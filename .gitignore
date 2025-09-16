@@ -1,0 +1,18 @@
+# ==== IDEs ====
+.idea/          # IntelliJ
+*.iml
+*.ipr
+*.iws
+
+.vscode/        # VS Code
+*.swp
+*.swo
+
+# ==== OS ====
+.DS_Store       # macOS
+Thumbs.db       # Windows
+ehthumbs.db
+Desktop.ini
+
+# ==== Other ====
+*.log
