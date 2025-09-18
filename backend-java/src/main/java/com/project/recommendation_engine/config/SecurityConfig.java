@@ -6,13 +6,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 // Configuration to allow access to endpoints without authentication
-/*
+
 @Configuration
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/home").permitAll()
                         .anyRequest().authenticated()
                 );
@@ -20,4 +21,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-*/
