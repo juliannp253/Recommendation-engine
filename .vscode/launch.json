@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-RecommendatioEngineApplication<recommendatio-engine>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.project.recommendation_engine.RecommendatioEngineApplication",
+            "projectName": "recommendatio-engine",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
