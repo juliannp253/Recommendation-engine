@@ -1,0 +1,83 @@
+:root {
+    --bg-dark: #181818;
+    --text-white: #ffffff;
+    --accent-red: #e50914;
+    --input-bg: #333333;
+    --input-text: #e0e0e0;
+    --btn-bg: var(var(--accent-red));
+    --btn-hover: #d81a0e;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.register-container {
+    width: 350px;
+    padding: 30px;
+    background: rgba(0,0,0,0.75);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    text-align: left;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-size: 1rem;
+}
+
+input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: var(--btn-bg);
+    color: var(--text-white);
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+input[type=submit]:hover {
+    background: var(--btn-hover);
+}
+
+p.error {
+    color: var(--accent-red);
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+}
+
+a {
+    color: var(--accent-red);
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+}
