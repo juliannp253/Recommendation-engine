@@ -12,7 +12,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                        .requestMatchers("/home", "/login", "/register").permitAll()
+                        .requestMatchers("/home", "/login", "/register", "/search").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
