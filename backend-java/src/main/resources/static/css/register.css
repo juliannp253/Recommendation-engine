@@ -52,6 +52,11 @@ input[type="password"] {
     font-size: 1rem;
 }
 
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
 input[type="submit"] {
     width: 100%;
     padding: 12px;

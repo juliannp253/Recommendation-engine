@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Favorite Movie Genres</title>
+    <link rel="stylesheet" href="register.css">
+</head>
+<body>
+<div class="register-container">
+    <h2>Tell us your favourite movie genres</h2>
+
+    <!-- The form could be submitted to whatever endpoint you like -->
+    <form action="/submit-genre-preferences" method="post">
+        <label>
+            <input type="checkbox" name="genres" value="ACTION">
+            Action
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="ADVENTURE">
+            Adventure
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="COMEDY">
+            Comedy
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="DRAMA">
+            Drama
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="HORROR">
+            Horror
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="SCI-FI">
+            Sci‑Fi
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="ROMANCE">
+            Romance
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="THRILLER">
+            Thriller
+        </label>
+
+        <label>
+            <input type="checkbox" name="genres" value="DOCUMENTARY">
+            Documentary
+        </label>
+
+        <!-- Optional: an error message placeholder -->
+        <p class="error" id="error-msg" style="display:none;">Please select at least one genre.</p>
+
+        <input type="submit" value="Save preferences">
+    </form>
+</div>
+</body>
+</html>
