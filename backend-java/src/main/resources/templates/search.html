@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Movies - Movie App</title>
+    <link rel="stylesheet" th:href="@{/css/search.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="search-header">
+        <h1>Search Movies</h1>
+        <a th:href="@{/home}" class="home-btn">Home</a>
+    </header>
+
+    <!-- Search Form -->
+    <main class="search-main">
+        <section class="search-section">
+            <form th:action="@{/search}" method="post" class="search-form">
+                <div class="search-input-container">
+                    <input type="text" 
+                           name="movieTitle" 
+                           placeholder="Enter movie title..." 
+                           class="search-input"
+                           th:value="${searchQuery}"
+                           required>
+                    <button type="submit" class="search-btn">Search</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Search Results -->
+        <section class="results-section" th:if="${searchResults}">
+            <h2>Search Results</h2>
+            <div class="results-container">
+                <div th:if="${movie}">
+                    <div class="movie-details">
+                        <img th:src="${movie.poster}" alt="Movie Poster" class="movie-poster" style="max-width:200px; float: left; margin-right: 20px;" />
+                        <div class="movie-info">
+                            <h3 th:text="${movie.title}"></h3>
+                            <p><strong>Year:</strong> <span th:text="${movie.year}"></span></p>
+                            <p><strong>IMDB ID:</strong> <span th:text="${movie.imdbID}"></span></p>
+                            <p><strong>Genre:</strong> <span th:text="${movie.genre}"></span></p>
+                            <p><strong>IMDB Rating:</strong> <span th:text="${movie.imdbRating}"></span></p>
+                            <p><strong>Plot:</strong> <span th:text="${movie.plot}"></span></p>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+                <div th:unless="${movie}">
+                    <p th:text="${searchResults}"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- No results message when no search has been performed -->
+        <section class="no-search-section" th:unless="${searchResults}">
+            <p>Enter a movie title above to search for movies.</p>
+        </section>
+    </main>
+</body>
+</html>
