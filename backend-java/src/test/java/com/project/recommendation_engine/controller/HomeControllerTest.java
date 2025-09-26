@@ -21,8 +21,8 @@ class HomeControllerTest {
     @Test
     void homePageShouldReturnView() throws Exception {
         mockMvc.perform(get("/home"))
-                .andExpect(status().isOk());       // Response HTTP 200
-                //.andExpect(view().name("home"));
+                .andExpect(status().isOk())       // Response HTTP 200
+                .andExpect(view().name("home"));
 
     }
 }
