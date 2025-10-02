@@ -3,6 +3,7 @@ package com.project.recommendation_engine.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -12,7 +13,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                        .requestMatchers("/home", "/login", "/register", "/search").permitAll()
+                        .requestMatchers("/home", "/login", "/register", "/search", "/questionnaire").permitAll()
 
                         .anyRequest().authenticated()
                 )
@@ -24,6 +25,10 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
 
