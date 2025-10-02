@@ -1,28 +1,55 @@
 package com.project.recommendation_engine.config;
 
+import com.project.recommendation_engine.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                        .requestMatchers("/home", "/login", "/register", "/search", "/questionnaire").permitAll()
 
+    private final UserDetailsServiceImpl userDetailsService;
+
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(requests -> requests
+                        // Public routes
+                        .requestMatchers("/login", "/register").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+
+                        // Protects any other routes
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**")
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .permitAll()
                 )
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.sameOrigin())
+                .logout(logout -> logout
+                        .permitAll()
+                        .logoutSuccessUrl("/login")
                 );
+
+        // Add auth. provider
+        http.authenticationProvider(authenticationProvider());
 
         return http.build();
     }
