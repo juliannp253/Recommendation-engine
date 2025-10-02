@@ -14,9 +14,9 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User registerUser(User user) {
@@ -29,8 +29,6 @@ public class UserService {
 
         String hasshedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hasshedPassword);
-
-        user.setCreatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
     }

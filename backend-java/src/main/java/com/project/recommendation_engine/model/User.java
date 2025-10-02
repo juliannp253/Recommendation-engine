@@ -1,34 +1,35 @@
 package com.project.recommendation_engine.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
-@Table(name = "users")
+@Document(collection = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(unique = true, nullable = false)
     private String username;
-    @Column(unique = true, nullable = false)
     private String email;
-    @Column(nullable = false)
     private String password;
 
     private LocalDateTime createdAt;
+
+    // Rating List
+    private List<Rating> movieRatings = new ArrayList<>();
 
     // Empty contructor needed
     public User(){}
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -64,8 +65,17 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    @PrePersist
+    public List<Rating> getMovieRatings() {
+        return movieRatings;
+    }
+
+    public void setMovieRatings(List<Rating> movieRatings) {
+        this.movieRatings = movieRatings;
+    }
+
     protected void onCreate(){
-        this.createdAt = LocalDateTime.now();
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
     }
 }
