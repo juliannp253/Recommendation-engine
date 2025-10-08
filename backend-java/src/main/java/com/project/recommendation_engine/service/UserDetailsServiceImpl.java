@@ -31,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                                 "User Not Found: " + usernameOrEmail)));
 
         // Converts model user into UserDetails object
-        return new org.springframework.security.core.userdetails.User(
+       return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
                 Collections.emptyList());

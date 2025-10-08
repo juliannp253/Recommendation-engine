@@ -26,7 +26,6 @@ public class UserService {
         if(userRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("This username already exists.");
         }
-
         String hasshedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hasshedPassword);
 
