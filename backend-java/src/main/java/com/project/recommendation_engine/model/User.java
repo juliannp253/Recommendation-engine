@@ -2,6 +2,7 @@ package com.project.recommendation_engine.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ public class User {
 
     private String username;
     private String email;
+    @Field("password")
     private String password;
 
     private LocalDateTime createdAt;
