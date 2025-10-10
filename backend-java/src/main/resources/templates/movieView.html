@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Details</title>
+    <link rel="stylesheet" th:href="@{/css/search.css}">
+</head>
+<body>
+<!-- Header -->
+<header class="search-header">
+    <h1 th:text="${movie.title}">Movie Details</h1>
+    <a th:href="@{/home}" class="home-btn">← Back to Home</a>
+</header>
+
+<!-- Main Movie Content -->
+<main class="search-main">
+    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem; align-items: start;">
+        
+        <!-- Movie Poster Section -->
+        <div>
+            <img th:if="${movie.poster != 'N/A'}" 
+                 th:src="${movie.poster}" 
+                 th:alt="${movie.title}" 
+                 style="width: 100%; max-width: 300px; height: auto; border-radius: 10px;">
+            <div th:if="${movie.poster == 'N/A'}" 
+                 style="width: 300px; height: 450px; background-color: #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #999;">
+                No Poster Available
+            </div>
+        </div>
+
+        <!-- Movie Information Section -->
+        <div>
+            <!-- Movie Metadata -->
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <span th:if="${movie.year}" 
+                          style="background-color: red; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;" 
+                          th:text="${movie.year}">Year</span>
+                    <span th:if="${movie.genre}" 
+                          style="background-color: teal; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;" 
+                          th:text="${movie.genre}">Genre</span>
+                    <span th:if="${movie.imdbRating != 'N/A'}" 
+                          style="background-color: yellow; color: #000; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;" 
+                          th:text="'IMDb: ' + ${movie.imdbRating}">IMDb Rating</span>
+                </div>
+
+                <div style="margin-bottom: 1.5rem; color: white;">
+                    <strong>IMDb ID:</strong> <span th:text="${movie.imdbID}">IMDb ID</span>
+                </div>
+            </div>
+            
+            <!-- Plot Section -->
+            <div th:if="${movie.plot != 'N/A'}" class="results-container" style="margin-bottom: 2rem;">
+                <h2>Plot</h2>
+                <p th:text="${movie.plot}">Movie plot description goes here.</p>
+            </div>
+            
+            <!-- Rating Section -->
+            <div class="results-container">
+                <h2>Rate this Movie</h2>
+                <p style="color: #aaa; font-size: 0.9rem; font-style: italic;">Rating functionality not yet complete.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
