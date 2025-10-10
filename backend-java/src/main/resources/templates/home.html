@@ -43,10 +43,12 @@
     <section class="movie-category">
         <h2>Sci-fi</h2>
         <div class="carousel">
-            <div class="movie-card">Movie A</div>
-            <div class="movie-card">Movie B</div>
-            <div class="movie-card">Movie C</div>
-            <div class="movie-card">Movie D</div>
+            <div th:each="movie : ${sciFiMovies}" class="movie-card">
+                <a th:href="@{'/movie/' + ${movie.imdbID}}" th:if="${movie.poster != null and movie.poster != 'N/A'}" style="width: 100%; height: 100%; display: block;">
+                    <img th:src="${movie.poster}" th:alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                </a>
+                <div th:if="${movie.poster == null or movie.poster == 'N/A'}" th:text="${movie.title}"></div>
+            </div>
         </div>
     </section>
 </main>
