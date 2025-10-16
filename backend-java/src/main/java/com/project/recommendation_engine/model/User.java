@@ -17,7 +17,7 @@ public class User {
     private String email;
     @Field("password")
     private String password;
-
+    private List<String> favoriteGenres = new ArrayList<>();
     private LocalDateTime createdAt;
 
     // Rating List
@@ -73,6 +73,14 @@ public class User {
 
     public void setMovieRatings(List<Rating> movieRatings) {
         this.movieRatings = movieRatings;
+    }
+
+    public List<String> getFavoriteGenres() {
+        return favoriteGenres;
+    }
+
+    public void setFavoriteGenres(List<String> favoriteGenres) {
+        this.favoriteGenres = favoriteGenres;
     }
 
     protected void onCreate(){

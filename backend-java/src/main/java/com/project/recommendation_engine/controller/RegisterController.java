@@ -27,13 +27,17 @@ public class RegisterController {
     // POST → Process form
     @PostMapping
     public String registerUser(@ModelAttribute User user, Model model) {
+        User savedUser;
+        
         try {
-            userService.registerUser(user);
+            savedUser = userService.registerUser(user);
         } catch (RuntimeException e) {
             model.addAttribute("registrationError", e.getMessage());
             return "register"; // Show form again
         }
-        return "redirect:/home"; // Continue to Home Page
+        String userId = savedUser.getId();
+
+        return "redirect:/questionnaire?userId=" + userId; // Continue to Home Page
     }
 }
 

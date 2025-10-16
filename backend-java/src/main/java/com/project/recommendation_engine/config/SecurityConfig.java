@@ -35,7 +35,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(requests -> requests
                         // Public routes
-                        .requestMatchers("/login", "/register").permitAll()
+                        .requestMatchers("/login", "/register", "/questionnaire", "/rating-form/**", "/save-initial-ratings").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // Protects any other routes

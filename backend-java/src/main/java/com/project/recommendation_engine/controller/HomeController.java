@@ -35,7 +35,7 @@ public class HomeController {
             // Fetch movie data from OMDB API
             for (String movieTitle : sciFiMovies) {
                 try {
-                    MovieResponse movie = omdbService.searchMovie(movieTitle);
+                    MovieResponse movie = omdbService.fetchRawMovieResponse(movieTitle);
                     if (movie != null && "True".equals(movie.getResponse())) {
                         sciFiMovieList.add(movie);
                     }
@@ -69,7 +69,6 @@ public class HomeController {
                 .orElse(null);
             
             if (selectedMovie != null) {
-                // System.out.println("DEBUG: Found movie: " + selectedMovie.getTitle());
                 model.addAttribute("movie", selectedMovie);
                 return "movieView";
             }
@@ -77,9 +76,8 @@ public class HomeController {
         
         // If movie not found in session, try to fetch it directly from API
         try {
-            MovieResponse movie = omdbService.searchMovie(imdbId);
+            MovieResponse movie = omdbService.fetchRawMovieResponse(imdbId);
             if (movie != null && "True".equals(movie.getResponse())) {
-                // System.out.println("DEBUG: Fetched movie from API: " + movie.getTitle());
                 model.addAttribute("movie", movie);
                 return "movieView";
             }
