@@ -1,0 +1,250 @@
+
+:root {
+    --bg-dark: #121212;
+    --text-white: #ffffff;
+    --accent-red: #e50914;
+    --card-bg: #1e1e1e;
+    --selection-border: 4px;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 40px;
+}
+
+.rating-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h2 {
+    color: var(--accent-red);
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.instruction {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #aaaaaa;
+    font-size: 1rem;
+}
+
+.genre-section h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--card-bg);
+    padding-bottom: 5px;
+    font-size: 1.5rem;
+}
+
+.movie-carousel {
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
+    padding-bottom: 20px;
+    scrollbar-color: var(--accent-red) transparent;
+    scrollbar-width: thin;
+}
+
+.movie-card {
+    flex: 0 0 180px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    position: relative;
+}
+
+.poster-wrapper {
+    position: relative;
+    cursor: pointer;
+    line-height: 0;
+    border: var(--selection-border) solid transparent;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+}
+
+.movie-poster {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+}
+
+.movie-card:hover .poster-wrapper {
+    border-color: #555555;
+}
+
+.movie-title {
+    font-size: 0.9rem;
+    height: 30px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 5px 0 10px 0;
+}
+
+
+.movie-card.selected .poster-wrapper {
+    border-color: var(--accent-red);
+}
+
+.selection-check {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--accent-red);
+    color: var(--text-white);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    display: none;
+}
+
+.movie-card.selected .selection-check {
+    display: block;
+}
+
+
+.rating-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    gap: 5px;
+}
+
+.rating-label {
+    font-size: 0.8rem;
+    color: #ccc;
+    margin-bottom: 5px;
+}
+
+.stars {
+    display: inline-block;
+    unicode-bidi: bidi-override;
+    direction: rtl;
+    text-align: center;
+}
+
+.stars > span {
+    display: inline-block;
+    position: relative;
+    width: 1.1em;
+    font-size: 1.5rem;
+    color: #555555;
+    cursor: pointer;
+    transition: color 0.1s;
+}
+
+.stars > span:hover:before,
+.stars > span:hover ~ span:before,
+.stars > span.rated:before,
+.stars > span.rated ~ span:before {
+    content: "\2605";
+    color: gold;
+    position: absolute;
+    left: 0;
+}
+
+#rating-form input[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    margin-top: 40px;
+    background: var(--accent-red);
+    color: var(--text-white);
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#rating-form input[type="submit"]:hover {
+    background: #d81a0e;
+}
+
+.error {
+    color: var(--accent-red);
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+}
+/*
+MANUAL SECTION
+*/
+
+.manual-search-section {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid var(--card-bg);
+}
+
+.manual-search-section h3 {
+    font-size: 1.3rem;
+    color: var(--text-white);
+    margin-bottom: 20px;
+    border-bottom: none;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 10px;
+    max-width: 500px;
+    margin-bottom: 20px;
+}
+
+#manualTitle {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: var(--card-bg);
+    color: var(--input-text);
+}
+
+.search-manual-btn {
+    padding: 10px 15px;
+    background: var(--accent-red);
+    color: var(--text-white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.search-manual-btn:hover {
+    background: var(--btn-hover);
+}
+
+
+#manual-search-results {
+    margin-top: 20px;
+}
+
+#manual-search-results .movie-card {
+
+    flex: 0 0 180px;
+    display: inline-block;
+    vertical-align: top;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* rating-form.css */
+.add-btn-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.add-rating-btn {
+    width: 100%;
+    max-width: 200px;
+}

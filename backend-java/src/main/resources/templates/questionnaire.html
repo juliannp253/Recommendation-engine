@@ -1,66 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Favorite Movie Genres</title>
-    <link rel="stylesheet" href="register.css">
+    <link href="../static/css/questionnaire.css" th:href="@{/css/questionnaire.css}" rel="stylesheet">
 </head>
 <body>
 <div class="register-container">
-    <h2>Tell us your favourite movie genres</h2>
+    <h2>Tell us about yourself</h2>
+    <p class="instruction">Pick up to 5 genres you love to start building your unique taste profile.</p>
 
-    <!-- The form could be submitted to whatever endpoint you like -->
-    <form action="/submit-genre-preferences" method="post">
-        <label>
-            <input type="checkbox" name="genres" value="ACTION">
-            Action
-        </label>
+    <form th:action="@{/questionnaire}" method="post" id="genre-form">
+        <input type="hidden" name="userId" th:value="${userId}" />
 
-        <label>
-            <input type="checkbox" name="genres" value="ADVENTURE">
-            Adventure
-        </label>
+        <div class="genre-selection">
+            
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="ACTION">
+                Action
+            </label>
 
-        <label>
-            <input type="checkbox" name="genres" value="COMEDY">
-            Comedy
-        </label>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="ADVENTURE">
+                Adventure
+            </label>
 
-        <label>
-            <input type="checkbox" name="genres" value="DRAMA">
-            Drama
-        </label>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="COMEDY">
+                Comedy
+            </label>
 
-        <label>
-            <input type="checkbox" name="genres" value="HORROR">
-            Horror
-        </label>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="DRAMA">
+                Drama
+            </label>
 
-        <label>
-            <input type="checkbox" name="genres" value="SCI-FI">
-            Sci‑Fi
-        </label>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="HORROR">
+                Horror
+            </label>
 
-        <label>
-            <input type="checkbox" name="genres" value="ROMANCE">
-            Romance
-        </label>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="SCI-FI">
+                Sci‑Fi
+            </label>
 
-        <label>
-            <input type="checkbox" name="genres" value="THRILLER">
-            Thriller
-        </label>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="ROMANCE">
+                Romance
+            </label>
 
-        <label>
-            <input type="checkbox" name="genres" value="DOCUMENTARY">
-            Documentary
-        </label>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="THRILLER">
+                Thriller
+            </label>
 
-        <!-- Optional: an error message placeholder -->
-        <p class="error" id="error-msg" style="display:none;">Please select at least one genre.</p>
+            <label class="genre-tag-label">
+                <input type="checkbox" name="genres" value="DOCUMENTARY">
+                Documentary
+            </label>
+        </div>
 
-        <input type="submit" value="Save preferences">
+        <p class="error" id="error-msg" style="display:none;">Please select between 1 and 5 genres.</p>
+
+        <input type="submit" value="Save preferences" id="submit-btn">
     </form>
 </div>
+<script th:src="@{/js/questionnaire-script.js}"></script>
 </body>
 </html>
