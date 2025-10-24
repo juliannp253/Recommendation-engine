@@ -1,16 +1,16 @@
 package com.project.recommendation_engine.service;
 
-import com.project.recommendation_engine.model.Rating;
-import com.project.recommendation_engine.model.User;
-import com.project.recommendation_engine.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-// import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.project.recommendation_engine.model.Rating;
+import com.project.recommendation_engine.model.User;
+import com.project.recommendation_engine.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -58,6 +58,20 @@ public class UserService {
         return userRepository.findById(userId)
                 .map(User::getFavoriteGenres)
                 .orElseThrow(() -> new RuntimeException("User not found or genres not set."));
+    }
+
+    public String getUserIdByUsername(String username) {
+        // Find user by username and return their ID
+        return userRepository.findByUsername(username)
+                .map(User::getId)
+                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found."));
+    }
+
+    public List<String> getFavoriteGenresByUsername(String username) {
+        // Find user by username and get their favorite genres
+        return userRepository.findByUsername(username)
+                .map(User::getFavoriteGenres)
+                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found or genres not set."));
     }
 
     public void addMovieRatings(String userId, List<Rating> newRatings) {

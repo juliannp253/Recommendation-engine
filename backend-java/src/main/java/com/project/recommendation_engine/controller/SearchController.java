@@ -1,6 +1,5 @@
 package com.project.recommendation_engine.controller;
 
-import com.project.recommendation_engine.model.Movie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +25,7 @@ public class SearchController {
     public String searchMovies(@RequestParam("movieTitle") String movieTitle, Model model) {
         model.addAttribute("searchQuery", movieTitle);
         MovieResponse movieResult = omdbService.fetchRawMovieResponse(movieTitle); // Call the OmdbService
-        if (movieResult != null) { // if we get a response then send the data to the page
+        if (movieResult != null && "True".equals(movieResult.getResponse())) { // Check for successful response
             model.addAttribute("movie", movieResult);
             model.addAttribute("searchResults", "found");
         } else { 

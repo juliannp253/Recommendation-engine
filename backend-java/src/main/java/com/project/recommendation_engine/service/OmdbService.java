@@ -1,21 +1,20 @@
 package com.project.recommendation_engine.service;
 
-import com.project.recommendation_engine.model.GenreMovies;
-import com.project.recommendation_engine.model.Movie;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.project.recommendation_engine.MovieResponse;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
+import com.project.recommendation_engine.model.GenreMovies;
+import com.project.recommendation_engine.model.Movie;
 
 
 
@@ -38,7 +37,17 @@ public class OmdbService {
     public MovieResponse fetchRawMovieResponse(String titleOrId) {
         RestTemplate restTemplate = new RestTemplate();
 
-        String url = String.format("http://www.omdbapi.com/?apikey=%s&i=%s&t=%s&plot=full", apiKey, titleOrId, titleOrId.replace(" ", "+"));
+        String url;
+        // Check if it's an IMDb ID (starts with "tt") or a title
+        if (titleOrId.startsWith("tt")) {
+            // Search by IMDb ID
+            url = String.format("http://www.omdbapi.com/?apikey=%s&i=%s&plot=full", 
+                               apiKey, titleOrId);
+        } else {
+            // Search by title
+            url = String.format("http://www.omdbapi.com/?apikey=%s&t=%s&plot=full", 
+                               apiKey, titleOrId.replace(" ", "+"));
+        }
 
         return restTemplate.getForObject(url, MovieResponse.class);
     }
@@ -57,7 +66,11 @@ public class OmdbService {
         Map<String, List<String>> genreTitlesMap = Map.of(
                 "ACTION", List.of("Mad Max: Fury Road", "Inception", "The Dark Knight", "John Wick", "Gladiator"),
                 "COMEDY", List.of("The Hangover", "Superbad", "Anchorman", "Dumb and Dumber", "Shaun of the Dead"),
-                "DRAMA", List.of("The Shawshank Redemption", "Forrest Gump", "Pulp Fiction", "Fight Club", "The Godfather")
+                "DRAMA", List.of("The Shawshank Redemption", "Forrest Gump", "Pulp Fiction", "Fight Club", "The Godfather"),
+                "ROMANCE", List.of("The Notebook", "Titanic", "Casablanca", "Pride and Prejudice", "Before Sunset"),
+                "HORROR", List.of("The Conjuring", "Hereditary", "Get Out", "A Quiet Place", "The Exorcist"),
+                "THRILLER", List.of("Se7en", "Gone Girl", "Zodiac", "Shutter Island", "No Country for Old Men"),
+                "SCI-FI", List.of("Blade Runner", "The Matrix", "Interstellar", "Star Wars", "Arrival")
                 // ... (More genres)
         );
 

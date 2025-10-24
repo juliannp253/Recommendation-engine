@@ -9,7 +9,7 @@
     <!-- Header -->
     <header class="search-header">
         <h1>Search Movies</h1>
-        <a th:href="@{/home}" class="home-btn">Home</a>
+        <a th:href="@{/home}" class="home-btn">← Back to Home</a>
     </header>
 
     <!-- Search Form -->
@@ -19,7 +19,7 @@
                 <div class="search-input-container">
                     <input type="text" 
                            name="movieTitle" 
-                           placeholder="Enter movie title..." 
+                           placeholder="Enter movie title or IMDB id..." 
                            class="search-input"
                            th:value="${searchQuery}"
                            required>
@@ -42,6 +42,9 @@
                             <p><strong>Genre:</strong> <span th:text="${movie.genre}"></span></p>
                             <p><strong>IMDB Rating:</strong> <span th:text="${movie.imdbRating}"></span></p>
                             <p><strong>Plot:</strong> <span th:text="${movie.plot}"></span></p>
+                            <div style="margin-top: 1rem;">
+                                <a th:href="@{'/movie/' + ${movie.imdbID}}" class="home-btn">View Full Details</a>
+                            </div>
                         </div>
                         <div style="clear: both;"></div>
                     </div>
