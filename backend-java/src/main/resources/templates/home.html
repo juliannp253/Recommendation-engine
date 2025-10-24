@@ -40,8 +40,24 @@
         </div>
     </section>
 
-    <section class="movie-category">
-        <h2>Sci-fi</h2>
+    <!-- Dynamic Genre Sections - Fixed property access -->
+    <div th:if="${genreMoviesList != null}" th:each="genreMovies : ${genreMoviesList}">
+        <section class="movie-category">
+            <h2 th:text="${genreMovies.genreName}">Test Genre Section</h2>
+            <div class="carousel">
+                <div th:each="movie : ${genreMovies.movies}" class="movie-card">
+                    <a th:href="@{'/movie/' + ${movie.id}}" th:if="${movie.posterUrl != null and movie.posterUrl != 'N/A'}" style="width: 100%; height: 100%; display: block;">
+                        <img th:src="${movie.posterUrl}" th:alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </a>
+                    <div th:if="${movie.posterUrl == null or movie.posterUrl == 'N/A'}" th:text="${movie.title}"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Fallback section if no genre movies available -->
+    <section class="movie-category" th:if="${genreMoviesList == null or genreMoviesList.isEmpty()}">
+        <h2>Movies</h2>
         <div class="carousel">
             <div th:each="movie : ${sciFiMovies}" class="movie-card">
                 <a th:href="@{'/movie/' + ${movie.imdbID}}" th:if="${movie.poster != null and movie.poster != 'N/A'}" style="width: 100%; height: 100%; display: block;">
