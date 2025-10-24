@@ -2,8 +2,6 @@ package com.project.recommendation_engine.model;
 
 import com.project.recommendation_engine.config.AppConfig;
 import com.project.recommendation_engine.repository.UserRepository;
-import com.project.recommendation_engine.service.UserService;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-//import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
