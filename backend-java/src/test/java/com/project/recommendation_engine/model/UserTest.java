@@ -1,34 +1,99 @@
 package com.project.recommendation_engine.model;
 
+import com.project.recommendation_engine.config.AppConfig;
+import com.project.recommendation_engine.repository.UserRepository;
+import com.project.recommendation_engine.service.UserService;
+import org.bson.types.ObjectId;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+//import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
+@DataMongoTest
+@Import({AppConfig.class})
 class UserTest {
 
-    @Test
-    void testGettersAndSetters() {
-        User user = new User();
+    @Autowired private UserRepository userRepository;
+    @Autowired private BCryptPasswordEncoder encoder;
 
-        user.setId("1L");
-        user.setUsername("user1");
-        user.setEmail("user1@example.com");
-        user.setPassword("securePassword");
+    private User sampleUser;
 
-        assertEquals("1L", user.getId());
-        assertEquals("user1", user.getUsername());
-        assertEquals("user1@example.com", user.getEmail());
-        assertEquals("securePassword", user.getPassword());
+    @BeforeEach
+    void setUp(){
+        sampleUser = new User();
+        sampleUser.setUsername("filmlover");
+        sampleUser.setEmail("filmlover@example.com");
+        sampleUser.setPassword("secret");
     }
 
     @Test
-    void testOnCreateSetsCreatedAt() {
-        User user = new User();
-        user.onCreate();
+    @DisplayName("All getter/setter should preserve values")
+    void gettersAndSetters(){
+        User u = new User();
+        u.setUsername("john");
+        u.setEmail("john@doe.com");
+        u.setPassword("pass");
 
-        assertNotNull(user.getCreatedAt());
-        assertTrue(user.getCreatedAt().isBefore(LocalDateTime.now().plusSeconds(1)));
+        assertThat(u.getUsername()).isEqualTo("john");
+        assertThat(u.getEmail()).isEqualTo("john@doe.com");
+        assertThat(u.getPassword()).isEqualTo("pass");
+    }
+
+    @Nested
+    @DisplayName("Persisting and loading a User")
+    class Persisting{
+
+        @Test
+        void shouldPersistUserAndReturnId(){
+            User persisted = userRepository.save(sampleUser);
+            assertThat(persisted.getId()).isNotNull();
+
+            Optional<User> fromDb = userRepository.findById(persisted.getId());
+            assertThat(fromDb).isPresent();
+            assertThat(fromDb.get().getEmail()).isEqualTo(sampleUser.getEmail());
+        }
+
+        @Test
+        void shouldNotPersistDuplicateEmail(){
+            User u1 = new User();
+            u1.setUsername("user1");
+            u1.setEmail("dup@example.com");
+            u1.setPassword("pw1");
+
+            User u2 = new User();
+            u2.setUsername("user2");
+            u2.setEmail("dup@example.com");
+            u2.setPassword("pw2");
+
+            userRepository.save(u1);
+            // The second insert will throw DuplicateKeyException at commit time
+            assertThatThrownBy(() -> userRepository.save(u2)).isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
+        }
+
+        @Test
+        void createdAtShouldBeSetWhenPersisted(){
+            User persisted = userRepository.save(sampleUser);
+            assertThat(persisted.getCreatedAt()).isNotNull();
+            assertThat(persisted.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+        }
+    }
+
+    @Test
+    @DisplayName("Password should be stored encrypted")
+    void passwordEncryption(){
+        User persisted = userRepository.save(sampleUser);
+
+        // The encoder used by the application (via AppConfig) should match
+        assertThat(encoder.matches("secret", persisted.getPassword())).isTrue();
     }
 }
