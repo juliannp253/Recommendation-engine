@@ -75,6 +75,22 @@ body {
     color: #e50914;
 }
 
+.top-navbar ul li .logout-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 100%;
+    font-family: inherit;
+}
+.top-navbar ul li .logout-button:hover {
+    color: #e50914;
+}
+
+
 /* Movie category sections */
 .movie-category {
     margin: 2rem 2rem;

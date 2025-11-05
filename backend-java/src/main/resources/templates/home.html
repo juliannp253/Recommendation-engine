@@ -25,6 +25,13 @@
         <li><a href="#">Filter</a></li>
         <li><a th:href="@{/search}">Search</a></li>
         <li><a href="#">Categories</a></li>
+        <li>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="logout-button">
+                    Logout
+                </button>
+            </form>
+        </li>
     </ul>
 </nav>
 

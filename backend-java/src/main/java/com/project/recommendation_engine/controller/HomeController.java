@@ -79,7 +79,8 @@ public class HomeController {
                     }
                     
                     // Create a new GenreMovies object with MovieResponse objects
-                    String genreName = favoriteGenres.get(processedGenreMovies.size()); // Get genre name from original list
+                    // String genreName = favoriteGenres.get(processedGenreMovies.size()); // Get genre name from original list
+                    String genreName = genreMovies.getGenreName();
                     processedGenreMovies.add(new GenreMovies(genreName, convertToMovies(genreMovieResponses)));
                 }
                 
