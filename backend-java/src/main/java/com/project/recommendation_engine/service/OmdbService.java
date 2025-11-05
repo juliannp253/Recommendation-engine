@@ -70,6 +70,7 @@ public class OmdbService {
                 "ROMANCE", List.of("The Notebook", "Titanic", "Casablanca", "Pride and Prejudice", "Before Sunset"),
                 "HORROR", List.of("The Conjuring", "Hereditary", "Get Out", "A Quiet Place", "The Exorcist"),
                 "THRILLER", List.of("Se7en", "Gone Girl", "Zodiac", "Shutter Island", "No Country for Old Men"),
+                "ADVENTURE", List.of("Pirates of the Caribbean", "Indiana Jones", "Lord of the Rings", "The Goonies"),
                 "SCI-FI", List.of("Blade Runner", "The Matrix", "Interstellar", "Star Wars", "Arrival")
                 // ... (More genres)
         );
