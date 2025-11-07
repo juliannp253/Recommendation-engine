@@ -1,36 +1,36 @@
 package com.project.recommendation_engine.controller;
 
-import com.project.recommendation_engine.model.GenreMovies;
-import com.project.recommendation_engine.model.Movie;
-import com.project.recommendation_engine.model.Rating;
-import com.project.recommendation_engine.service.UserService;
-import com.project.recommendation_engine.service.OmdbService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.project.recommendation_engine.model.GenreMovies;
+import com.project.recommendation_engine.model.Movie;
+import com.project.recommendation_engine.model.Rating;
+import com.project.recommendation_engine.service.TMDBService;
+import com.project.recommendation_engine.service.UserService;
 
 @Controller
 @RequestMapping("/rating-form")
 public class RatingFormController {
 
     private final UserService userService;
-    private final OmdbService omdbService;
+    private final TMDBService tmdbService;
 
     @Autowired
-    public RatingFormController(UserService userService, OmdbService omdbService) {
+    public RatingFormController(UserService userService, TMDBService tmdbService) {
         this.userService = userService;
-        this.omdbService = omdbService;
+        this.tmdbService = tmdbService;
     }
 
     @GetMapping
@@ -51,7 +51,7 @@ public class RatingFormController {
             }
 
             // Give me movies for each of these genres
-            List<GenreMovies> genresWithMovies = omdbService.fetchMoviesForGenres(favoriteGenres);
+            List<GenreMovies> genresWithMovies = tmdbService.fetchMoviesForGenres(favoriteGenres);
 
             // Give data to the model in Thymeleaf
             model.addAttribute("userId", userId);
@@ -113,13 +113,13 @@ public class RatingFormController {
 
         // Give data to render view (Keep original data when searching a movie)
         List<String> favoriteGenres = userService.getFavoriteGenresByUserId(userId);
-        List<GenreMovies> genresWithMovies = omdbService.fetchMoviesForGenres(favoriteGenres);
+        List<GenreMovies> genresWithMovies = tmdbService.fetchMoviesForGenres(favoriteGenres);
 
         model.addAttribute("userId", userId);
         model.addAttribute("genresWithMovies", genresWithMovies);
 
         // Search a new movie
-        Movie foundMovie = omdbService.searchMovie(manualTitle);
+        Movie foundMovie = tmdbService.searchMovie(manualTitle);
 
         if (foundMovie != null) {
             model.addAttribute("manualMovie", foundMovie);
@@ -135,7 +135,7 @@ public class RatingFormController {
     @ResponseBody
     public ResponseEntity<Movie> searchMovieApi(@RequestParam String title) {
 
-        Movie foundMovie = omdbService.searchMovie(title);
+        Movie foundMovie = tmdbService.searchMovie(title);
 
         if (foundMovie != null) {
             return ResponseEntity.ok(foundMovie);
