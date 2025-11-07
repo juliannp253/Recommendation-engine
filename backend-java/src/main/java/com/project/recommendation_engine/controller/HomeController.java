@@ -48,6 +48,7 @@ public class HomeController {
         if (!currentUsername.equals(cachedUsername) || cacheExpired || manualRefresh) {
             // Clear cache if different user OR cache expired (for fresh movies)
             session.removeAttribute("genreMovies");
+            session.removeAttribute("trendingMovies");
             session.removeAttribute("userMovies");
             session.removeAttribute("sciFiMovies");
             session.setAttribute("cachedUsername", currentUsername);
@@ -59,6 +60,7 @@ public class HomeController {
         // Check if movies are already cached in session
         @SuppressWarnings("unchecked")
         List<TMDBResponse> userMovieList = (List<TMDBResponse>) session.getAttribute("userMovies");
+        List<TMDBResponse> trendingMoviesList = (List<TMDBResponse>) session.getAttribute("trendingMovies");
         
         // If not in session, fetch from API based on user's favorite genres
         if (userMovieList == null) {
@@ -96,7 +98,6 @@ public class HomeController {
                 
                 // Cache the processed genre movies in session
                 session.setAttribute("genreMovies", processedGenreMovies);
-                  
             
             } catch (Exception e) {
                 System.err.println("Error fetching user's favorite genres: " + e.getMessage());
@@ -124,6 +125,16 @@ public class HomeController {
             session.setAttribute("userMovies", userMovieList);
         }
 
+        if (trendingMoviesList == null) {
+            try {
+                trendingMoviesList = tmdbService.fetchTrendingMovies();
+                session.setAttribute("trendingMovies", trendingMoviesList);
+            } catch (Exception e) {
+                System.err.println("Error fetching trending movies: " + e.getMessage());
+                trendingMoviesList = new ArrayList<>();
+            }
+        }
+
         // Get genre movies from session for display
         @SuppressWarnings("unchecked")
         List<GenreMovies> genreMoviesList = (List<GenreMovies>) session.getAttribute("genreMovies");
@@ -145,6 +156,7 @@ public class HomeController {
         }
         
         model.addAttribute("genreMoviesList", genreMoviesList);
+        model.addAttribute("trendingMoviesList", trendingMoviesList != null ? trendingMoviesList : new ArrayList<>());
         model.addAttribute("sciFiMovies", userMovieList != null ? userMovieList : new ArrayList<>()); 
         return "home";
     }
