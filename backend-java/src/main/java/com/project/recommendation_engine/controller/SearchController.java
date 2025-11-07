@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.project.recommendation_engine.MovieResponse;
-import com.project.recommendation_engine.service.OmdbService;
+import com.project.recommendation_engine.model.TMDBResponse;
+import com.project.recommendation_engine.service.TMDBService;
 
 @Controller
 public class SearchController {
     @Autowired
-    private OmdbService omdbService;
+    private TMDBService tmdbService;
     
     @GetMapping("/search")
     public String search() {
@@ -24,7 +24,7 @@ public class SearchController {
     @PostMapping("/search")
     public String searchMovies(@RequestParam("movieTitle") String movieTitle, Model model) {
         model.addAttribute("searchQuery", movieTitle);
-        MovieResponse movieResult = omdbService.fetchRawMovieResponse(movieTitle); // Call the OmdbService
+        TMDBResponse movieResult = (TMDBResponse) tmdbService.fetchRawMovieResponse(movieTitle); // Call the TMDBService
         if (movieResult != null && "True".equals(movieResult.getResponse())) { // Check for successful response
             model.addAttribute("movie", movieResult);
             model.addAttribute("searchResults", "found");

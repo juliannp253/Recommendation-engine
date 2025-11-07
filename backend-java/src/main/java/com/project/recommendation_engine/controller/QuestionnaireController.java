@@ -1,8 +1,7 @@
 package com.project.recommendation_engine.controller;
 
-import com.project.recommendation_engine.model.GenreMovies;
-import com.project.recommendation_engine.service.OmdbService;
-import com.project.recommendation_engine.service.UserService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,19 +11,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
+import com.project.recommendation_engine.model.GenreMovies;
+import com.project.recommendation_engine.service.TMDBService;
+import com.project.recommendation_engine.service.UserService;
 
 @Controller
 @RequestMapping("/questionnaire")
 public class QuestionnaireController {
 
     private final UserService userService;
-    private final OmdbService omdbService;
+    private final TMDBService tmdbService;
 
     @Autowired
-    public QuestionnaireController(UserService userService, OmdbService omdbService) {
+    public QuestionnaireController(UserService userService, TMDBService tmdbService) {
         this.userService = userService;
-        this.omdbService = omdbService;
+        this.tmdbService = tmdbService;
     }
 
     @GetMapping
@@ -47,7 +48,7 @@ public class QuestionnaireController {
         userService.saveFavoriteGenres(userId, genres);
 
         // 2. Get a list of movies by each genre IN-PROGRESS
-        List<GenreMovies> moviesForRating = omdbService.fetchMoviesForGenres(genres);
+        List<GenreMovies> moviesForRating = tmdbService.fetchMoviesForGenres(genres);
 
         redirectAttributes.addFlashAttribute("genresWithMovies", moviesForRating);
         redirectAttributes.addAttribute("userId", userId);
