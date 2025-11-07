@@ -189,4 +189,27 @@ public class TMDBService {
                     "https://image.tmdb.org/t/p/w500" + tmdbMovie.getPosterPath() : null
         );
     }
+
+    public List<TMDBResponse> fetchTrendingMovies() {
+        String url = String.format("%s/movie/popular?api_key=%s&language=en-US&page=1",
+                baseUrl, apiKey);
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            TmdbMovieListResponse response = restTemplate.getForObject(url, TmdbMovieListResponse.class);
+
+            if (response != null && response.getResults() != null) {
+                return response.getResults().stream()
+                        // Top 10 movies
+                        .limit(10)
+                        .map(this::mapTmdbToMovieResponse)
+                        .collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching trending movies: " + e.getMessage());
+        }
+
+        // Return an empty List if an error
+        return new ArrayList<>();
+    }
 }

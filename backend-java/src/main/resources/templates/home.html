@@ -37,15 +37,19 @@
 
 <!-- Categories -->
 <main>
-    <section class="movie-category">
-        <h2>Recommended</h2>
-        <div class="carousel">
-            <div class="movie-card">Movie 1</div>
-            <div class="movie-card">Movie 2</div>
-            <div class="movie-card">Movie 3</div>
-            <div class="movie-card">Movie 4</div>
-        </div>
-    </section>
+    <div th:if="${trendingMoviesList != null and !trendingMoviesList.isEmpty()}">
+        <section class="movie-category">
+            <h2>Top Trending</h2>
+            <div class="carousel">
+                <div th:each="movie : ${trendingMoviesList}" class="movie-card">
+                    <a th:href="@{'/movie/' + ${movie.ImdbID}}" th:if="${movie.poster != null}" style="width: 100%; height: 100%; display: block;">
+                        <img th:src="${movie.poster}" th:alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </a>
+                    <div th:if="${movie.poster == null}" th:text="${movie.title}"></div>
+                </div>
+            </div>
+        </section>
+    </div>
 
     <!-- Dynamic Genre Sections - Fixed property access -->
     <div th:if="${genreMoviesList != null}" th:each="genreMovies : ${genreMoviesList}">
