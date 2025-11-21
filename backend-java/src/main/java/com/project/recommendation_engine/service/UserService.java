@@ -74,6 +74,12 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User with username " + username + " not found or genres not set."));
     }
 
+    public User findByUsername(String username) {
+        // Find user by username and return the User object
+        return userRepository.findByUsername(username)
+                .orElse(null);
+    }
+
     public void addMovieRatings(String userId, List<Rating> newRatings) {
         userRepository.findById(userId).ifPresent(user -> {
 
