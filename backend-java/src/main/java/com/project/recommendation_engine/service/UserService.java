@@ -16,11 +16,13 @@ import com.project.recommendation_engine.repository.UserRepository;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final RecommendationAgentService recommendationAgentService;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, RecommendationAgentService recommendationAgentService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.recommendationAgentService = recommendationAgentService;
     }
 
     public User registerUser(User user) {
@@ -89,6 +91,7 @@ public class UserService {
 
             user.getMovieRatings().addAll(newRatings);
             userRepository.save(user);
+            recommendationAgentService.triggerRecommendationForUser(userId);
         });
     }
 }
