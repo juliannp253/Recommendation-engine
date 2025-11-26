@@ -29,7 +29,9 @@ public class RecommendationScheduler {
             System.out.println("zzz It is odd week (" + weekOfYear + "). Agent rests today.");
         }
     }
-    /* FOR TESTING IMMEDIATELY 10 SEC AFTER RUNNING APP
+
+    // FOR TESTING IMMEDIATELY 10 SEC AFTER RUNNING APP
+    /*
     @Scheduled(initialDelay = 10000, fixedDelay = 999999999)
     public void runTestOnStartup() {
         System.out.println(" INITIAL TEST: Running Batch...");

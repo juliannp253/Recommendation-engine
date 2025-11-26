@@ -67,25 +67,46 @@ public class TMDBService {
     public TMDBResponse fetchRawMovieResponse(String titleOrId) {
         RestTemplate restTemplate = new RestTemplate();
         String url;
-        
+
+        // CASO 1: ID de IMDb (empieza con "tt")
+        if (titleOrId.startsWith("tt")) {
+            url = String.format("%s/find/%s?api_key=%s&external_source=imdb_id", baseUrl, titleOrId, apiKey);
+            try {
+                TmdbFindResponse findResponse = restTemplate.getForObject(url, TmdbFindResponse.class);
+                if (findResponse != null && findResponse.getMovieResults() != null && !findResponse.getMovieResults().isEmpty()) {
+                    return mapTmdbToMovieResponse(findResponse.getMovieResults().get(0));
+                }
+            } catch (Exception e) {
+                System.err.println("Error searching by IMDb ID: " + e.getMessage());
+            }
+        }
+
+        // CASO 2: ID Numérico (TMDB ID) - Usado por tus recomendaciones nuevas
         try {
-            // Check if it's a numeric ID or a title
             Long movieId = Long.parseLong(titleOrId);
-            // Search by TMDB ID
             url = String.format("%s/movie/%d?api_key=%s", baseUrl, movieId, apiKey);
             TMDBResponse.TmdbMovie tmdbMovie = restTemplate.getForObject(url, TMDBResponse.TmdbMovie.class);
             return mapTmdbToMovieResponse(tmdbMovie);
+
         } catch (NumberFormatException e) {
-            // Search by title
-            url = String.format("%s/search/movie?api_key=%s&query=%s", 
-                               baseUrl, apiKey, titleOrId.replace(" ", "%20"));
-            TmdbMovieListResponse searchResponse = restTemplate.getForObject(url, TmdbMovieListResponse.class);
-            
-            if (searchResponse != null && searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
-                return mapTmdbToMovieResponse(searchResponse.getResults().get(0));
+            // CASO 3: Búsqueda por Título (Si no es número ni empieza con tt)
+            // Solo entra aquí si NO empezó con "tt"
+            if (!titleOrId.startsWith("tt")) {
+                url = String.format("%s/search/movie?api_key=%s&query=%s",
+                        baseUrl, apiKey, titleOrId.replace(" ", "%20"));
+                try {
+                    TmdbMovieListResponse searchResponse = restTemplate.getForObject(url, TmdbMovieListResponse.class);
+                    if (searchResponse != null && searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
+                        return mapTmdbToMovieResponse(searchResponse.getResults().get(0));
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Error searching by title: " + ex.getMessage());
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error fetching movie details: " + e.getMessage());
         }
-        
+
         return null;
     }
 
@@ -211,5 +232,14 @@ public class TMDBService {
 
         // Return an empty List if an error
         return new ArrayList<>();
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class TmdbFindResponse {
+        @JsonProperty("movie_results")
+        private List<TMDBResponse.TmdbMovie> movieResults;
+
+        public List<TMDBResponse.TmdbMovie> getMovieResults() { return movieResults; }
+        public void setMovieResults(List<TMDBResponse.TmdbMovie> movieResults) { this.movieResults = movieResults; }
     }
 }
