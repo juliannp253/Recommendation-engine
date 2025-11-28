@@ -1,26 +1,28 @@
-# 1. Usamos una imagen base que tenga Java (JDK 17 o la versión que uses)
+# 1. Base image that have Java
 FROM eclipse-temurin:17-jdk-focal
 
-# 2. Instalamos Python y Pip en el mismo sistema
+# 2. Install Python and PIP
 RUN apt-get update && apt-get install -y python3 python3-pip
 
-# 3. Establecemos el directorio de trabajo
+# 3. Establish work directory
 WORKDIR /app
 
-# 4. Copiamos los archivos del Agente Python
+RUN pip3 install --upgrade pip
+# ---------------------------------------------------------------
+
+# 4. Copy Python's Agent files
 COPY python_agent /app/python_agent
 
-# 5. Instalamos las dependencias de Python
+# 5. Install Python's dependencies
 RUN pip3 install -r /app/python_agent/requirements.txt
 
-# 6. Copiamos el código de Java y el Maven Wrapper
+# 6. Copy Java code and Maven Wrapper
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
 
-# 7. Construimos el JAR de Spring Boot (Saltando tests para ahorrar tiempo en deploy)
+# 7. Build Spring Boot's JAR without tests
 RUN ./mvnw clean package -DskipTests
 
-# 8. Comando para iniciar la aplicación
-# Ajusta el nombre del .jar al que genere tu proyecto (mira en target/)
+# 8. Command to start
 CMD ["java", "-jar", "target/recommendatio-engine-0.0.1-SNAPSHOT.jar"]
