@@ -19,6 +19,7 @@ RUN pip3 install -r /app/python_agent/requirements.txt
 # 6. Copy Java code and Maven Wrapper
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
+RUN chmod +x mvnw
 COPY src ./src
 
 # 7. Build Spring Boot's JAR without tests
