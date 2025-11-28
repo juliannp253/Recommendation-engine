@@ -1,5 +1,6 @@
 package com.project.recommendation_engine.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -9,9 +10,10 @@ import java.io.InputStreamReader;
 @Service
 public class RecommendationAgentService {
 
-    private final String SCRIPT_PATH = "D:\\OneDrive\\Escritorio\\UNIVERSITY\\FALL2025\\Senior Project\\movie-agent\\batch_processor.py";
+    @Value("${app.python.script-path:./python_agent/batch_processor.py}")
+    private String SCRIPT_PATH;
 
-    private final String PYTHON_CMD = "python";
+    private final String PYTHON_CMD = "python3";
 
     @Async("taskExecutor") // Thread's pool defined on AsyncConfig
     public void triggerRecommendationForUser(String userId) {
