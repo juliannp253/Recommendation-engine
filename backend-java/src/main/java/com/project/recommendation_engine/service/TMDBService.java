@@ -64,6 +64,45 @@ public class TMDBService {
         public void setTotalResults(Integer totalResults) { this.totalResults = totalResults; }
     }
 
+    // Classes to map JSON responses from /watch/providers
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class ProviderListResponse {
+        @JsonProperty("results")
+        private Map<String, RegionInfo> results;
+
+        public Map<String, RegionInfo> getResults() { return results; }
+        public void setResults(Map<String, RegionInfo> results) { this.results = results; }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class RegionInfo {
+        @JsonProperty("link")
+        private String link;
+        @JsonProperty("flatrate")
+        private List<ProviderItem> flatrate;
+        @JsonProperty("rent")
+        private List<ProviderItem> rent;
+        @JsonProperty("buy")
+        private List<ProviderItem> buy;
+
+        // Getters
+        public String getLink() { return link; }
+        public List<ProviderItem> getFlatrate() { return flatrate; }
+        public List<ProviderItem> getRent() { return rent; }
+        public List<ProviderItem> getBuy() { return buy; }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class ProviderItem {
+        @JsonProperty("provider_name")
+        private String providerName;
+        @JsonProperty("logo_path")
+        private String logoPath;
+
+        public String getProviderName() { return providerName; }
+        public String getLogoPath() { return logoPath; }
+    }
+
     public TMDBResponse fetchRawMovieResponse(String titleOrId) {
         RestTemplate restTemplate = new RestTemplate();
         String url;
@@ -194,6 +233,9 @@ public class TMDBService {
         response.setYear(tmdbMovie.getReleaseDate() != null && tmdbMovie.getReleaseDate().length() >= 4 ? 
             tmdbMovie.getReleaseDate().substring(0, 4) : null);
         response.setResponse("True");
+
+        // NEW PROVIDERS
+        enrichWithWatchProviders(response, String.valueOf(tmdbMovie.getId()));
         
         return response;
     }
@@ -232,6 +274,41 @@ public class TMDBService {
 
         // Return an empty List if an error
         return new ArrayList<>();
+    }
+
+    // NEW METHOD TO FETCH PROVIDERS
+    private void enrichWithWatchProviders(TMDBResponse response, String tmdbId) {
+        if (tmdbId == null) return;
+
+        String url = String.format("%s/movie/%s/watch/providers?api_key=%s", baseUrl, tmdbId, apiKey);
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            ProviderListResponse providers = restTemplate.getForObject(url, ProviderListResponse.class);
+
+            // Accedemos a la región US
+            if (providers != null && providers.getResults() != null && providers.getResults().containsKey("US")) {
+                RegionInfo usInfo = providers.getResults().get("US");
+
+                response.setWatchLink(usInfo.getLink());
+                response.setFlatrateProviders(mapProviders(usInfo.getFlatrate()));
+                response.setRentProviders(mapProviders(usInfo.getRent()));
+                response.setBuyProviders(mapProviders(usInfo.getBuy()));
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching watch providers: " + e.getMessage());
+        }
+    }
+
+    private List<TMDBResponse.Provider> mapProviders(List<ProviderItem> items) {
+        if (items == null) return new ArrayList<>();
+
+        return items.stream()
+                .map(item -> new TMDBResponse.Provider(
+                        item.getProviderName(),
+                        "https://image.tmdb.org/t/p/original" + item.getLogoPath()
+                ))
+                .collect(Collectors.toList());
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
