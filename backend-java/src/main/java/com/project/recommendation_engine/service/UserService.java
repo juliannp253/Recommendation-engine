@@ -94,4 +94,32 @@ public class UserService {
             recommendationAgentService.triggerRecommendationForUser(userId);
         });
     }
+
+    public void addOrUpdateRating(String username, String movieId, Double ratingValue) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            List<Rating> ratings = user.getMovieRatings();
+
+            if (ratings == null) {
+                ratings = new ArrayList<>();
+            }
+
+            // UPSERT: Delete if already exists to overwrite
+            ratings.removeIf(r -> r.getMovieId().equals(movieId));
+
+            Rating newRating = new Rating();
+            newRating.setMovieId(movieId);
+
+            newRating.setScore(ratingValue);
+
+            ratings.add(newRating);
+            user.setMovieRatings(ratings);
+            userRepository.save(user);
+
+        } else {
+            throw new RuntimeException("User not found.");
+        }
+    }
 }
