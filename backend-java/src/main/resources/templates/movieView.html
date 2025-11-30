@@ -60,6 +60,52 @@
                 <h2>Rate this Movie</h2>
                 <p style="color: #aaa; font-size: 0.9rem; font-style: italic;">Rating functionality not yet complete.</p>
             </div>
+
+            <!-- Providers Section -->
+            <div class="providers-section" th:if="${not #lists.isEmpty(movie.flatrateProviders) or not #lists.isEmpty(movie.rentProviders) or not #lists.isEmpty(movie.buyProviders)}">
+
+                <div class="provider-category" th:if="${not #lists.isEmpty(movie.flatrateProviders)}">
+                    <h3>Stream</h3>
+                    <div class="provider-grid">
+                        <div th:each="provider : ${movie.flatrateProviders}">
+                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;">
+                                <img th:src="${provider.logoUrl}"
+                                     th:alt="${provider.name}"
+                                     th:title="'Watch on ' + ${provider.name}"
+                                     class="provider-logo">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="provider-category" th:if="${not #lists.isEmpty(movie.rentProviders)}">
+                    <h3>Rent</h3>
+                    <div class="provider-grid">
+                        <div th:each="provider : ${movie.rentProviders}">
+                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;">
+                                <img th:src="${provider.logoUrl}"
+                                     th:alt="${provider.name}"
+                                     th:title="'Rent on ' + ${provider.name}"
+                                     class="provider-logo">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="provider-category" th:if="${not #lists.isEmpty(movie.buyProviders)}">
+                    <h3>Buy</h3>
+                    <div class="provider-grid">
+                        <div th:each="provider : ${movie.buyProviders}">
+                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;">
+                                <img th:src="${provider.logoUrl}"
+                                     th:alt="${provider.name}"
+                                     th:title="'Buy on ' + ${provider.name}"
+                                     class="provider-logo">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
