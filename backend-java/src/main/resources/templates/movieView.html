@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <title>Movie Details</title>
     <link rel="stylesheet" th:href="@{/css/search.css}">
+
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
+<input type="hidden" id="movieIdField" th:value="${movie.imdbID}" />
 <!-- Header -->
 <header class="search-header">
     <h1 th:text="${movie.title}">Movie Details</h1>
@@ -68,7 +72,7 @@
                     <h3>Stream</h3>
                     <div class="provider-grid">
                         <div th:each="provider : ${movie.flatrateProviders}">
-                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;">
+                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;" onclick="autoRateMovie()">
                                 <img th:src="${provider.logoUrl}"
                                      th:alt="${provider.name}"
                                      th:title="'Watch on ' + ${provider.name}"
@@ -82,7 +86,7 @@
                     <h3>Rent</h3>
                     <div class="provider-grid">
                         <div th:each="provider : ${movie.rentProviders}">
-                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;">
+                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;" onclick="autoRateMovie()">
                                 <img th:src="${provider.logoUrl}"
                                      th:alt="${provider.name}"
                                      th:title="'Rent on ' + ${provider.name}"
@@ -96,7 +100,7 @@
                     <h3>Buy</h3>
                     <div class="provider-grid">
                         <div th:each="provider : ${movie.buyProviders}">
-                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;">
+                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;" onclick="autoRateMovie()">
                                 <img th:src="${provider.logoUrl}"
                                      th:alt="${provider.name}"
                                      th:title="'Buy on ' + ${provider.name}"
@@ -109,6 +113,38 @@
         </div>
     </div>
 </main>
+<script>
+    function autoRateMovie() {
+        // Get ID
+        const movieIdVal = document.getElementById("movieIdField").value;
 
+        // Get CSRF Token from meta tags
+        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+        const payload = {
+            movieId: movieIdVal,
+            rating: 3.0
+        };
+
+        // Send to the backend with the security Header
+        fetch('/api/rate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Auto-rating success: 3 stars assigned to ID " + movieIdVal);
+            } else {
+                console.error("Error saving rating: Status " + response.status);
+            }
+        })
+        .catch(error => console.error("Network error:", error));
+    }
+</script>
 </body>
 </html>
