@@ -1,18 +1,35 @@
-
 :root {
-    --bg-dark: #121212;
-    --text-white: #ffffff;
-    --accent-red: #e50914;
-    --card-bg: #1e1e1e;
+    --primary-color: #e50914;
+    --primary-hover: #f40612;
+    --background-color: #121212;
+    --surface-color: #1e1e1e;
+    --text-color: #ffffff;
+    --text-secondary: #b3b3b3;
+    --font-family: 'Inter', sans-serif;
+    --transition-speed: 0.3s;
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 12px rgba(0, 0, 0, 0.5);
     --selection-border: 4px;
 }
 
 body {
-    background: var(--bg-dark);
-    color: var(--text-white);
-    font-family: 'Arial', sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
     margin: 0;
-    padding: 40px;
+    padding: 2rem;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .rating-container {
@@ -21,43 +38,65 @@ body {
 }
 
 h2 {
-    color: var(--accent-red);
+    color: var(--primary-color);
     text-align: center;
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 2rem;
 }
 
 .instruction {
     text-align: center;
-    margin-bottom: 40px;
-    color: #aaaaaa;
-    font-size: 1rem;
+    margin-bottom: 3rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
 }
 
 .genre-section h3 {
-    margin-top: 30px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--card-bg);
-    padding-bottom: 5px;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--surface-color);
+    padding-bottom: 0.5rem;
     font-size: 1.5rem;
+    color: var(--text-color);
 }
 
 .movie-carousel {
     display: flex;
     overflow-x: auto;
-    gap: 20px;
-    padding-bottom: 20px;
-    scrollbar-color: var(--accent-red) transparent;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
     scrollbar-width: thin;
+    scrollbar-color: var(--surface-color) var(--background-color);
+}
+
+.movie-carousel::-webkit-scrollbar {
+    height: 8px;
+}
+
+.movie-carousel::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+.movie-carousel::-webkit-scrollbar-thumb {
+    background-color: var(--surface-color);
+    border-radius: 4px;
 }
 
 .movie-card {
     flex: 0 0 180px;
-    background: var(--card-bg);
+    background: var(--surface-color);
     border-radius: 8px;
-    padding: 10px;
-    transition: transform 0.3s, box-shadow 0.3s;
+    padding: 1rem;
+    transition: all var(--transition-speed) ease;
     text-align: center;
     position: relative;
+    box-shadow: var(--shadow-soft);
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
 }
 
 .poster-wrapper {
@@ -66,7 +105,7 @@ h2 {
     line-height: 0;
     border: var(--selection-border) solid transparent;
     border-radius: 4px;
-    transition: border-color 0.2s;
+    transition: border-color var(--transition-speed) ease;
 }
 
 .movie-poster {
@@ -77,55 +116,57 @@ h2 {
 }
 
 .movie-card:hover .poster-wrapper {
-    border-color: #555555;
+    border-color: #555;
 }
 
 .movie-title {
     font-size: 0.9rem;
-    height: 30px;
+    height: 40px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-    margin: 5px 0 10px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin: 0.8rem 0;
+    color: var(--text-color);
+    line-height: 1.4;
 }
 
-
 .movie-card.selected .poster-wrapper {
-    border-color: var(--accent-red);
+    border-color: var(--primary-color);
 }
 
 .selection-check {
     position: absolute;
     top: 5px;
     right: 5px;
-    background: var(--accent-red);
-    color: var(--text-white);
+    background: var(--primary-color);
+    color: var(--text-color);
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
     font-weight: bold;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     display: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .movie-card.selected .selection-check {
     display: block;
 }
 
-
 .rating-controls {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 10px;
-    gap: 5px;
+    padding-top: 0.5rem;
+    gap: 0.5rem;
 }
 
 .rating-label {
     font-size: 0.8rem;
-    color: #ccc;
-    margin-bottom: 5px;
+    color: var(--text-secondary);
 }
 
 .stars {
@@ -135,116 +176,114 @@ h2 {
     text-align: center;
 }
 
-.stars > span {
+.stars>span {
     display: inline-block;
     position: relative;
     width: 1.1em;
     font-size: 1.5rem;
-    color: #555555;
+    color: #555;
     cursor: pointer;
     transition: color 0.1s;
 }
 
-.stars > span:hover:before,
-.stars > span:hover ~ span:before,
-.stars > span.rated:before,
-.stars > span.rated ~ span:before {
+.stars>span:hover:before,
+.stars>span:hover~span:before,
+.stars>span.rated:before,
+.stars>span.rated~span:before {
     content: "\2605";
-    color: gold;
+    color: #ffd700;
     position: absolute;
     left: 0;
 }
 
 #rating-form input[type="submit"] {
     width: 100%;
-    padding: 15px;
-    margin-top: 40px;
-    background: var(--accent-red);
-    color: var(--text-white);
+    padding: 1rem;
+    margin-top: 3rem;
+    background: var(--primary-color);
+    color: var(--text-color);
     border: none;
     border-radius: 4px;
     font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all var(--transition-speed) ease;
+    box-shadow: var(--shadow-soft);
 }
 
 #rating-form input[type="submit"]:hover {
-    background: #d81a0e;
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
 .error {
-    color: var(--accent-red);
+    color: var(--primary-color);
     text-align: center;
-    margin-top: 15px;
-    font-weight: bold;
+    margin-top: 1rem;
+    font-weight: 600;
 }
-/*
-MANUAL SECTION
-*/
 
+/* MANUAL SECTION */
 .manual-search-section {
-    margin-top: 50px;
-    padding-top: 20px;
-    border-top: 1px solid var(--card-bg);
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--surface-color);
 }
 
 .manual-search-section h3 {
-    font-size: 1.3rem;
-    color: var(--text-white);
-    margin-bottom: 20px;
-    border-bottom: none;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
 }
 
 .search-input-group {
     display: flex;
-    gap: 10px;
-    max-width: 500px;
-    margin-bottom: 20px;
+    gap: 1rem;
+    max-width: 600px;
+    margin-bottom: 1.5rem;
 }
 
 #manualTitle {
     flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #555;
+    padding: 0.8rem;
+    border: 1px solid transparent;
     border-radius: 4px;
-    background: var(--card-bg);
-    color: var(--input-text);
+    background: var(--surface-color);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color var(--transition-speed) ease;
+}
+
+#manualTitle:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 .search-manual-btn {
-    padding: 10px 15px;
-    background: var(--accent-red);
-    color: var(--text-white);
+    padding: 0.8rem 1.5rem;
+    background: var(--primary-color);
+    color: var(--text-color);
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background 0.2s;
+    font-weight: 600;
+    transition: all var(--transition-speed) ease;
 }
 
 .search-manual-btn:hover {
-    background: var(--btn-hover);
+    background: var(--primary-hover);
 }
 
-
 #manual-search-results {
-    margin-top: 20px;
+    margin-top: 1.5rem;
 }
 
 #manual-search-results .movie-card {
-
     flex: 0 0 180px;
     display: inline-block;
     vertical-align: top;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-}
-
-/* rating-form.css */
-.add-btn-container {
-    margin-top: 15px;
-    text-align: center;
-}
-
-.add-rating-btn {
-    width: 100%;
-    max-width: 200px;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
 }

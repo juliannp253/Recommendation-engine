@@ -4,16 +4,24 @@
     <meta charset="UTF-8">
     <title>Home - Movie App</title>
     <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<header class="hero-section">
-    <img th:src="@{/images/placeholder.png}" alt="Featured Movie" class="hero-poster" />
+<header class="hero-section" id="hero-container"
+        th:style="'background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), #0d0d0d), url(' + @{/images/placeholder_bg.jpg} + ');'">
+
+    <img id="hero-poster" th:src="@{/images/placeholder.png}" alt="Featured Movie" class="hero-poster" style="transition: opacity 0.5s ease-in-out;" />
+
     <div class="hero-info">
-        <h1 class="movie-title">Movie Title</h1>
-        <p class="movie-synopsis">
-            This is a brief synopsis of the featured movie. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        <h1 id="hero-title" class="movie-title">Generating Recommendations...</h1>
+
+        <p id="hero-desc" class="movie-synopsis">
+            We are analyzing your taste to find the best movies for you.
         </p>
-        <button class="watch-btn">Watch Now</button>
+
+        <a id="hero-btn" href="#" class="watch-btn">View Details</a>
     </div>
 </header>
 
@@ -67,5 +75,60 @@
         <p style="color: white; text-align: center;">Generating your personalized recommendations...</p>
     </section>
 </main>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var recommendationSections = /*[[${recommendationSections}]]*/ null;
+    var trendingMovies = /*[[${trendingMoviesList}]]*/ null;
+
+    var heroMovies = [];
+
+
+    if (recommendationSections && recommendationSections.length > 0) {
+        heroMovies = recommendationSections[0].movies;
+    }
+
+    else if (trendingMovies && trendingMovies.length > 0) {
+        heroMovies = trendingMovies.map(m => ({
+            id: m.ImdbID || m.id,
+            title: m.title,
+            posterPath: m.poster,
+            aiReason: m.plot || "Trending worldwide right now."
+        }));
+    }
+
+    if (heroMovies.length > 0) {
+        let currentIndex = 0;
+
+        const posterEl = document.getElementById('hero-poster');
+        const titleEl = document.getElementById('hero-title');
+        const descEl = document.getElementById('hero-desc');
+        const btnEl = document.getElementById('hero-btn');
+        const containerEl = document.getElementById('hero-container');
+
+        function updateHero() {
+            const movie = heroMovies[currentIndex];
+
+            posterEl.style.opacity = 0;
+
+            setTimeout(() => {
+                posterEl.src = movie.posterPath;
+                titleEl.textContent = movie.title;
+                descEl.textContent = movie.aiReason ? '"' + movie.aiReason + '"' : "Recommended for you.";
+                btnEl.href = '/movie/' + movie.id;
+
+                posterEl.style.opacity = 1;
+            }, 500);
+
+            currentIndex = (currentIndex + 1) % heroMovies.length;
+        }
+
+        updateHero();
+        setInterval(updateHero, 7500);
+    }
+    /*]]>*/
+</script>
+
 </body>
 </html>

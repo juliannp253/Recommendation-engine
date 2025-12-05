@@ -212,14 +212,11 @@ public class TMDBService {
             TmdbMovieListResponse response = restTemplate.getForObject(url, TmdbMovieListResponse.class);
             
             if (response != null && response.getResults() != null) {
-                List<Movie> movies = response.getResults().stream()
-                        .filter(movie -> movie.getPosterPath() != null)
-                        .map(this::mapTmdbMovieToMovie)
-                        .collect(Collectors.toList());
-
-                java.util.Collections.shuffle(movies);
-
-                return movies.stream().limit(10).collect(Collectors.toList());
+                return response.getResults().stream()
+                    .filter(movie -> movie.getPosterPath() != null) // Only include movies with posters
+                    .limit(10) // Limit to 10 movies per genre
+                    .map(this::mapTmdbMovieToMovie)
+                    .collect(Collectors.toList());
             }
         } catch (Exception e) {
             System.err.println("Error fetching movies for genre ID: " + genreId + " - " + e.getMessage());

@@ -1,78 +1,86 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Movie Details</title>
     <link rel="stylesheet" th:href="@{/css/search.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
+
 <body>
-<input type="hidden" id="movieIdField" th:value="${movie.imdbID}" />
-<!-- Header -->
-<header class="search-header">
-    <h1 th:text="${movie.title}">Movie Details</h1>
-    <a th:href="@{/home}" class="home-btn">← Back to Home</a>
-</header>
+    <input type="hidden" id="movieIdField" th:value="${movie.imdbID}" />
+    <!-- Header -->
+    <header class="search-header">
+        <h1 th:text="${movie.title}">Movie Details</h1>
+        <a th:href="@{/home}" class="home-btn">← Back to Home</a>
+    </header>
 
-<!-- Main Movie Content -->
-<main class="search-main">
-    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem; align-items: start;">
-        
-        <!-- Movie Poster Section -->
-        <div>
-            <img th:if="${movie.poster != 'N/A'}" 
-                 th:src="${movie.poster}" 
-                 th:alt="${movie.title}" 
-                 style="width: 100%; max-width: 300px; height: auto; border-radius: 10px;">
-            <div th:if="${movie.poster == 'N/A'}" 
-                 style="width: 300px; height: 450px; background-color: #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #999;">
-                No Poster Available
-            </div>
-        </div>
+    <!-- Main Movie Content -->
+    <main class="search-main">
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem; align-items: start;">
 
-        <!-- Movie Information Section -->
-        <div>
-            <!-- Movie Metadata -->
-            <div style="margin-bottom: 2rem;">
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                    <span th:if="${movie.year}" 
-                          style="background-color: red; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;" 
-                          th:text="${movie.year}">Year</span>
-                    <span th:if="${movie.genre}" 
-                          style="background-color: teal; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;" 
-                          th:text="${movie.genre}">Genre</span>
-                    <span th:if="${movie.imdbRating != 'N/A'}" 
-                          style="background-color: yellow; color: #000; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;" 
-                          th:text="'IMDb: ' + ${movie.imdbRating}">IMDb Rating</span>
-                </div>
-
-                <div style="margin-bottom: 1.5rem; color: white;">
-                    <strong>IMDb ID:</strong> <span th:text="${movie.imdbID}">IMDb ID</span>
+            <!-- Movie Poster Section -->
+            <div>
+                <img th:if="${movie.poster != 'N/A'}" th:src="${movie.poster}" th:alt="${movie.title}"
+                    style="width: 100%; max-width: 300px; height: auto; border-radius: 10px;">
+                <div th:if="${movie.poster == 'N/A'}"
+                    style="width: 300px; height: 450px; background-color: #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #999;">
+                    No Poster Available
                 </div>
             </div>
-            
-            <!-- Plot Section -->
-            <div th:if="${movie.plot != 'N/A'}" class="results-container" style="margin-bottom: 2rem;">
-                <h2>Plot</h2>
-                <p th:text="${movie.plot}">Movie plot description goes here.</p>
-            </div>
-            
-            <!-- Rating Section -->
-            <div class="results-container">
-                <h2>Rate this Movie</h2>
-                <p style="color: #aaa; font-size: 0.9rem; font-style: italic;">Rating functionality not yet complete.</p>
-            </div>
 
-            <!-- Providers Section -->
-            <div class="providers-section" th:if="${not #lists.isEmpty(movie.flatrateProviders) or not #lists.isEmpty(movie.rentProviders) or not #lists.isEmpty(movie.buyProviders)}">
+            <!-- Movie Information Section -->
+            <div>
+                <!-- Movie Metadata -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <span th:if="${movie.year}"
+                            style="background-color: red; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
+                            th:text="${movie.year}">Year</span>
+                        <span th:if="${movie.genre}"
+                            style="background-color: teal; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
+                            th:text="${movie.genre}">Genre</span>
+                        <span th:if="${movie.imdbRating != 'N/A'}"
+                            style="background-color: yellow; color: #000; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
+                            th:text="'IMDb: ' + ${movie.imdbRating}">IMDb Rating</span>
+                    </div>
 
-                <div class="provider-category" th:if="${not #lists.isEmpty(movie.flatrateProviders)}">
-                    <h3>Stream</h3>
-                    <div class="provider-grid">
-                        <div th:each="provider : ${movie.flatrateProviders}">
-                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;" onclick="autoRateMovie()">
+                    <div style="margin-bottom: 1.5rem; color: white;">
+                        <strong>IMDb ID:</strong> <span th:text="${movie.imdbID}">IMDb ID</span>
+                    </div>
+                </div>
+
+                <!-- Plot Section -->
+                <div th:if="${movie.plot != 'N/A'}" class="results-container" style="margin-bottom: 2rem;">
+                    <h2>Plot</h2>
+                    <p th:text="${movie.plot}">Movie plot description goes here.</p>
+                </div>
+
+                <!-- Rating Section -->
+                <div class="results-container">
+                    <h2>Rate this Movie</h2>
+                    <p style="color: #aaa; font-size: 0.9rem; font-style: italic;">Rating functionality not yet
+                        complete.</p>
+                </div>
+
+                <!-- Providers Section -->
+                <div class="providers-section"
+                     th:if="${not #lists.isEmpty(movie.flatrateProviders) or not #lists.isEmpty(movie.rentProviders) or not #lists.isEmpty(movie.buyProviders)}">
+
+                    <div class="provider-category" th:if="${not #lists.isEmpty(movie.flatrateProviders)}">
+                        <h3>Stream</h3>
+                        <div class="provider-grid">
+                            <a th:each="provider : ${movie.flatrateProviders}"
+                               th:href="${movie.watchLink}"
+                               target="_blank"
+                               onclick="autoRateMovie()"
+                               style="text-decoration: none;">
                                 <img th:src="${provider.logoUrl}"
                                      th:alt="${provider.name}"
                                      th:title="'Watch on ' + ${provider.name}"
@@ -80,13 +88,15 @@
                             </a>
                         </div>
                     </div>
-                </div>
 
-                <div class="provider-category" th:if="${not #lists.isEmpty(movie.rentProviders)}">
-                    <h3>Rent</h3>
-                    <div class="provider-grid">
-                        <div th:each="provider : ${movie.rentProviders}">
-                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;" onclick="autoRateMovie()">
+                    <div class="provider-category" th:if="${not #lists.isEmpty(movie.rentProviders)}">
+                        <h3>Rent</h3>
+                        <div class="provider-grid">
+                            <a th:each="provider : ${movie.rentProviders}"
+                               th:href="${movie.watchLink}"
+                               target="_blank"
+                               onclick="autoRateMovie()"
+                               style="text-decoration: none;">
                                 <img th:src="${provider.logoUrl}"
                                      th:alt="${provider.name}"
                                      th:title="'Rent on ' + ${provider.name}"
@@ -94,13 +104,15 @@
                             </a>
                         </div>
                     </div>
-                </div>
 
-                <div class="provider-category" th:if="${not #lists.isEmpty(movie.buyProviders)}">
-                    <h3>Buy</h3>
-                    <div class="provider-grid">
-                        <div th:each="provider : ${movie.buyProviders}">
-                            <a th:href="${movie.watchLink}" target="_blank" style="text-decoration: none;" onclick="autoRateMovie()">
+                    <div class="provider-category" th:if="${not #lists.isEmpty(movie.buyProviders)}">
+                        <h3>Buy</h3>
+                        <div class="provider-grid">
+                            <a th:each="provider : ${movie.buyProviders}"
+                               th:href="${movie.watchLink}"
+                               target="_blank"
+                               onclick="autoRateMovie()"
+                               style="text-decoration: none;">
                                 <img th:src="${provider.logoUrl}"
                                      th:alt="${provider.name}"
                                      th:title="'Buy on ' + ${provider.name}"
@@ -111,40 +123,40 @@
                 </div>
             </div>
         </div>
-    </div>
-</main>
-<script>
-    function autoRateMovie() {
-        // Get ID
-        const movieIdVal = document.getElementById("movieIdField").value;
+    </main>
+    <script>
+        function autoRateMovie() {
+            // Get ID
+            const movieIdVal = document.getElementById("movieIdField").value;
 
-        // Get CSRF Token from meta tags
-        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
-        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            // Get CSRF Token from meta tags
+            const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
 
-        const payload = {
-            movieId: movieIdVal,
-            rating: 3.0
-        };
+            const payload = {
+                movieId: movieIdVal,
+                rating: 3.0
+            };
 
-        // Send to the backend with the security Header
-        fetch('/api/rate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => {
-            if (response.ok) {
-                console.log("Auto-rating success: 3 stars assigned to ID " + movieIdVal);
-            } else {
-                console.error("Error saving rating: Status " + response.status);
-            }
-        })
-        .catch(error => console.error("Network error:", error));
-    }
-</script>
+            // Send to the backend with the security Header
+            fetch('/api/rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("Auto-rating success: 3 stars assigned to ID " + movieIdVal);
+                    } else {
+                        console.error("Error saving rating: Status " + response.status);
+                    }
+                })
+                .catch(error => console.error("Network error:", error));
+        }
+    </script>
 </body>
+
 </html>
