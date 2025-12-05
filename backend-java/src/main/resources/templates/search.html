@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Search Movies - Movie App</title>
     <link rel="stylesheet" th:href="@{/css/search.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <!-- Header -->
     <header class="search-header">
@@ -17,12 +22,8 @@
         <section class="search-section">
             <form th:action="@{/search}" method="post" class="search-form">
                 <div class="search-input-container">
-                    <input type="text" 
-                           name="movieTitle" 
-                           placeholder="Enter movie title or IMDB id..." 
-                           class="search-input"
-                           th:value="${searchQuery}"
-                           required>
+                    <input type="text" name="movieTitle" placeholder="Enter movie title or IMDB id..."
+                        class="search-input" th:value="${searchQuery}" required>
                     <button type="submit" class="search-btn">Search</button>
                 </div>
             </form>
@@ -34,7 +35,8 @@
             <div class="results-container">
                 <div th:if="${movie}">
                     <div class="movie-details">
-                        <img th:src="${movie.poster}" alt="Movie Poster" class="movie-poster" style="max-width:200px; float: left; margin-right: 20px;" />
+                        <img th:src="${movie.poster}" alt="Movie Poster" class="movie-poster"
+                            style="max-width:200px; float: left; margin-right: 20px;" />
                         <div class="movie-info">
                             <h3 th:text="${movie.title}"></h3>
                             <p><strong>Year:</strong> <span th:text="${movie.year}"></span></p>
@@ -61,4 +63,5 @@
         </section>
     </main>
 </body>
+
 </html>

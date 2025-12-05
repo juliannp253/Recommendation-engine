@@ -1,69 +1,83 @@
 :root {
-    --bg-dark: #181818;
-    --text-white: #ffffff;
-    --accent-red: #e50914; /* Netflix red */
-    --input-bg: #333333;
-    --input-text: #e0e0e0;
-    --btn-bg: var(--accent-red);
-    --btn-hover: #d81a0e;
-    --tag-bg: #444444;
+    --primary-color: #e50914;
+    --primary-hover: #f40612;
+    --background-color: #121212;
+    --surface-color: #1e1e1e;
+    --text-color: #ffffff;
+    --text-secondary: #b3b3b3;
+    --font-family: 'Inter', sans-serif;
+    --transition-speed: 0.3s;
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 12px rgba(0, 0, 0, 0.5);
+    --tag-bg: #333;
+    --tag-hover: #444;
 }
 
 body {
-    background: var(--bg-dark);
-    color: var(--text-white);
-    font-family: Arial, Helvetica, sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .register-container {
-    width: 400px;
-    padding: 30px;
-    background: rgba(0,0,0,0.75);
+    width: 500px;
+    padding: 2.5rem;
+    background: var(--surface-color);
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    text-align: left;
+    box-shadow: var(--shadow-soft);
+    text-align: center;
 }
 
 h2 {
-    text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    font-size: 1.8rem;
 }
 
-/* Instructions for the user */
 .instruction {
-    text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 2rem;
     font-size: 1rem;
-    color: var(--input-text);
+    color: var(--text-secondary);
+    line-height: 1.5;
 }
 
-/* ---------------------------------------------------- */
 /* GENRE TAGS SELECTION */
-/* ---------------------------------------------------- */
-
 .genre-selection {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px; /* Space between tags */
-    margin-bottom: 30px;
-    justify-content: center; /* Center tags */
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    justify-content: center;
 }
 
 .genre-tag-label {
-    display: inline-block; 
-    padding: 8px 15px;
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
     background: var(--tag-bg);
-    border-radius: 20px;
+    border-radius: 50px;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease; /* Hover and Selection */
-    border: 2px solid var(--tag-bg);
-    user-select: none; /* No text selection */
+    font-size: 0.95rem;
+    transition: all var(--transition-speed) ease;
+    border: 1px solid transparent;
+    user-select: none;
+    color: var(--text-secondary);
 }
 
 .genre-tag-label input[type="checkbox"] {
@@ -71,72 +85,40 @@ h2 {
 }
 
 .genre-tag-label:hover {
-    background: #555555;
-    color: var(--text-white);
-}
-
-
-.genre-tag-label input[type="checkbox"]:checked + * {
-    background: var(--accent-red);
-    color: var(--text-white);
-    border-color: var(--accent-red);
-    font-weight: bold;
-}
-
-/* Paint Red */
-.genre-tag-label input[type="checkbox"]:checked + .genre-tag-label,
-.genre-tag-label input[type="checkbox"]:checked {
-    background: var(--accent-red);
-    border-color: var(--accent-red);
-}
-
-.genre-tag-label input[type="checkbox"]:checked {
-}
-
-
-.genre-tag-label input[type="checkbox"]:checked + span,
-.genre-tag-label input[type="checkbox"]:checked ~ span,
-.genre-tag-label input[type="checkbox"]:checked ~ span:before {
-}
-
-.genre-tag-label input[type="checkbox"]:checked {
+    background: var(--tag-hover);
+    color: var(--text-color);
 }
 
 .genre-tag-label:has(input[type="checkbox"]:checked) {
-    background: var(--accent-red);
-    border-color: var(--accent-red);
-    color: var(--text-white);
+    background: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);
 }
-
 
 input[type="submit"] {
     width: 100%;
-    padding: 12px;
-    background: var(--btn-bg);
-    color: var(--text-white);
+    padding: 1rem;
+    background: var(--primary-color);
+    color: var(--text-color);
     border: none;
     border-radius: 4px;
     font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 20px;
+    transition: all var(--transition-speed) ease;
+    margin-top: 1rem;
+    box-shadow: var(--shadow-soft);
 }
 
-input[type=submit]:hover {
-    background: var(--btn-hover);
+input[type="submit"]:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
 p.error {
-    color: var(--accent-red);
-    font-size: 0.85rem;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.instruction {
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 1rem;
-    color: var(--input-text);
-    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
 }
