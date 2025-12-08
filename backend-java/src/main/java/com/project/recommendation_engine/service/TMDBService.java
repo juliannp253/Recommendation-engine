@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.recommendation_engine.model.GenreMovies;
 import com.project.recommendation_engine.model.Movie;
 import com.project.recommendation_engine.model.TMDBResponse;
-import org.springframework.web.util.UriComponentsBuilder;
 
 
 // This service will call the TMDB Api and return the information
@@ -103,6 +103,19 @@ public class TMDBService {
         public String getLogoPath() { return logoPath; }
     }
 
+    // Helper method to fetch full movie details with credits
+    private TMDBResponse fetchMovieDetailsWithCredits(Long tmdbId) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = String.format("%s/movie/%d?api_key=%s&append_to_response=credits", baseUrl, tmdbId, apiKey);
+        try {
+            TMDBResponse.TmdbMovie tmdbMovie = restTemplate.getForObject(url, TMDBResponse.TmdbMovie.class);
+            return mapTmdbToMovieResponse(tmdbMovie);
+        } catch (Exception e) {
+            System.err.println("Error fetching movie details with credits: " + e.getMessage());
+            return null;
+        }
+    }
+
     public TMDBResponse fetchRawMovieResponse(String titleOrId) {
         RestTemplate restTemplate = new RestTemplate();
         String url;
@@ -113,7 +126,9 @@ public class TMDBService {
             try {
                 TmdbFindResponse findResponse = restTemplate.getForObject(url, TmdbFindResponse.class);
                 if (findResponse != null && findResponse.getMovieResults() != null && !findResponse.getMovieResults().isEmpty()) {
-                    return mapTmdbToMovieResponse(findResponse.getMovieResults().get(0));
+                    // Get the TMDB ID and fetch full details with credits
+                    Long tmdbId = findResponse.getMovieResults().get(0).getId();
+                    return fetchMovieDetailsWithCredits(tmdbId);
                 }
             } catch (Exception e) {
                 System.err.println("Error searching by IMDb ID: " + e.getMessage());
@@ -123,7 +138,7 @@ public class TMDBService {
         // CASO 2: ID Numérico (TMDB ID) - Usado por tus recomendaciones nuevas
         try {
             Long movieId = Long.parseLong(titleOrId);
-            url = String.format("%s/movie/%d?api_key=%s", baseUrl, movieId, apiKey);
+            url = String.format("%s/movie/%d?api_key=%s&append_to_response=credits", baseUrl, movieId, apiKey);
             TMDBResponse.TmdbMovie tmdbMovie = restTemplate.getForObject(url, TMDBResponse.TmdbMovie.class);
             return mapTmdbToMovieResponse(tmdbMovie);
 
@@ -136,7 +151,9 @@ public class TMDBService {
                 try {
                     TmdbMovieListResponse searchResponse = restTemplate.getForObject(url, TmdbMovieListResponse.class);
                     if (searchResponse != null && searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
-                        return mapTmdbToMovieResponse(searchResponse.getResults().get(0));
+                        // Get the TMDB ID and fetch full details with credits
+                        Long tmdbId = searchResponse.getResults().get(0).getId();
+                        return fetchMovieDetailsWithCredits(tmdbId);
                     }
                 } catch (Exception ex) {
                     System.err.println("Error searching by title: " + ex.getMessage());
@@ -235,13 +252,47 @@ public class TMDBService {
         
         TMDBResponse response = new TMDBResponse();
         response.setTitle(tmdbMovie.getTitle());
-        response.setImdbID(String.valueOf(tmdbMovie.getId()));
+        response.setTmdbID(String.valueOf(tmdbMovie.getId()));
         response.setPoster(tmdbMovie.getPosterPath() != null ? 
             "https://image.tmdb.org/t/p/w500" + tmdbMovie.getPosterPath() : null);
         response.setPlot(tmdbMovie.getOverview());
         response.setYear(tmdbMovie.getReleaseDate() != null && tmdbMovie.getReleaseDate().length() >= 4 ? 
             tmdbMovie.getReleaseDate().substring(0, 4) : null);
+        response.setTmdbRating(tmdbMovie.getVoteAverage() != null ? 
+            String.format("%.1f", tmdbMovie.getVoteAverage()) : "N/A");
         response.setResponse("True");
+
+        // Extract genres
+        if (tmdbMovie.getGenres() != null && !tmdbMovie.getGenres().isEmpty()) {
+            String genreNames = tmdbMovie.getGenres().stream()
+                .map(TMDBResponse.Genre::getName)
+                .collect(Collectors.joining(", "));
+            response.setGenre(genreNames);
+        } else {
+            response.setGenre("N/A");
+        }
+
+        // Extract director and actors from credits
+        if (tmdbMovie.getCredits() != null) {
+            // Get director(s)
+            if (tmdbMovie.getCredits().getCrew() != null) {
+                String directors = tmdbMovie.getCredits().getCrew().stream()
+                    .filter(crew -> "Director".equals(crew.getJob()))
+                    .map(TMDBResponse.Crew::getName)
+                    .collect(Collectors.joining(", "));
+                response.setDirector(directors.isEmpty() ? "N/A" : directors);
+            }
+            
+            // Get top 5 actors
+            if (tmdbMovie.getCredits().getCast() != null) {
+                String actors = tmdbMovie.getCredits().getCast().stream()
+                    .filter(cast -> cast.getOrder() != null && cast.getOrder() < 5)
+                    .sorted((a, b) -> Integer.compare(a.getOrder(), b.getOrder()))
+                    .map(TMDBResponse.Cast::getName)
+                    .collect(Collectors.joining(", "));
+                response.setActors(actors.isEmpty() ? "N/A" : actors);
+            }
+        }
 
         // NEW PROVIDERS
         enrichWithWatchProviders(response, String.valueOf(tmdbMovie.getId()));
@@ -274,7 +325,8 @@ public class TMDBService {
                 return response.getResults().stream()
                         // Top 10 movies
                         .limit(10)
-                        .map(this::mapTmdbToMovieResponse)
+                        .map(movie -> fetchMovieDetailsWithCredits(movie.getId()))
+                        .filter(movie -> movie != null)
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
