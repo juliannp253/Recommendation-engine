@@ -9,14 +9,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-// import com.project.recommendation_engine.model.GenreMovies; DELETE
 import com.project.recommendation_engine.model.TMDBResponse;
-import com.project.recommendation_engine.service.TMDBService;
-import com.project.recommendation_engine.service.UserService;
 import com.project.recommendation_engine.model.UserRecommendation;
 import com.project.recommendation_engine.repository.RecommendationRepository;
+import com.project.recommendation_engine.service.TMDBService;
+import com.project.recommendation_engine.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -99,9 +99,9 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping("/movie/{imdbId}")
-    public String movieView(@PathVariable String imdbId, Model model, HttpSession session) {
-        // System.out.println("DEBUG: MovieView called with imdbId: " + imdbId);
+    @GetMapping("/movie/{title}")
+    public String movieView(@PathVariable String title, Model model, HttpSession session) {
+        // System.out.println("DEBUG: MovieView called with title: " + title);
         
         // Get the cached movies from session (check both new and old session keys for compatibility)
         @SuppressWarnings("unchecked")
@@ -110,7 +110,7 @@ public class HomeController {
 
         if (trendingList != null) {
             selectedMovie = trendingList.stream()
-                    .filter(movie -> imdbId.equals(movie.getImdbID()))
+                    .filter(movie -> title.equals(movie.getTitle()))
                     .findFirst()
                     .orElse(null);
         }
@@ -122,16 +122,35 @@ public class HomeController {
         
         // If movie not found in session, try to fetch it directly from API
         try {
-            TMDBResponse movie = (TMDBResponse) tmdbService.fetchRawMovieResponse(imdbId);
+            TMDBResponse movie = (TMDBResponse) tmdbService.fetchRawMovieResponse(title);
             if (movie != null && "True".equals(movie.getResponse())) {
                 model.addAttribute("movie", movie);
                 return "movieView";
             }
         } catch (Exception e) {
-            System.err.println("Error fetching movie with ID: " + imdbId + " - " + e.getMessage());
+            System.err.println("Error fetching movie with title: " + title + " - " + e.getMessage());
         }
         
         // If all fails, redirect back to home
         return "redirect:/home";
+    }
+
+    @PostMapping("/rate-movie")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<String> rateMovie(
+            @RequestParam String movieId,
+            @RequestParam Double rating) {
+        
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
+            
+            userService.addOrUpdateRating(currentUsername, movieId, rating);
+            
+            return org.springframework.http.ResponseEntity.ok("Rating saved successfully");
+        } catch (Exception e) {
+            System.err.println("Error saving rating: " + e.getMessage());
+            return org.springframework.http.ResponseEntity.status(500).body("Error saving rating");
+        }
     }
 }

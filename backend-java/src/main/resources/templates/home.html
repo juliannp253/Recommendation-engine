@@ -45,8 +45,8 @@
             <h2>Top Trending</h2>
             <div class="carousel">
                 <div th:each="movie : ${trendingMoviesList}" class="movie-card">
-                    <a th:href="@{'/movie/' + ${movie.ImdbID}}" th:if="${movie.poster != null}" style="width: 100%; height: 100%; display: block;">
-                        <img th:src="${movie.poster}" th:alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                    <a th:href="@{'/movie/' + ${movie.title}}" th:if="${movie.poster != null}" style="width: 100%; height: 100%; display: block;">
+                        <img th:src="${movie.poster}" th:alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
                     </a>
                     <div th:if="${movie.poster == null}" th:text="${movie.title}"></div>
                 </div>
@@ -61,7 +61,7 @@
             <div class="carousel">
                 <div th:each="movie : ${section.movies}" class="movie-card" th:title="${movie.aiReason}">
 
-                    <a th:href="@{'/movie/' + ${movie.id}}" th:if="${movie.posterPath != null}" style="width: 100%; height: 100%; display: block;">
+                    <a th:href="@{'/movie/' + ${movie.title}}" th:if="${movie.posterPath != null}" style="width: 100%; height: 100%; display: block;">
                         <img th:src="${movie.posterPath}" th:alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
                     </a>
 

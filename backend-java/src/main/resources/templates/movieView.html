@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <input type="hidden" id="movieIdField" th:value="${movie.imdbID}" />
+    <input type="hidden" id="movieIdField" th:value="${movie.tmdbID}" />
     <!-- Header -->
     <header class="search-header">
         <h1 th:text="${movie.title}">Movie Details</h1>
@@ -46,13 +46,29 @@
                         <span th:if="${movie.genre}"
                             style="background-color: teal; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
                             th:text="${movie.genre}">Genre</span>
-                        <span th:if="${movie.imdbRating != 'N/A'}"
+                        <span th:if="${movie.tmdbRating != 'N/A'}"
                             style="background-color: yellow; color: #000; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
-                            th:text="'IMDb: ' + ${movie.imdbRating}">IMDb Rating</span>
+                            th:text="'TMDB: ' + ${movie.tmdbRating}">TMDB Rating</span>
                     </div>
 
                     <div style="margin-bottom: 1.5rem; color: white;">
-                        <strong>IMDb ID:</strong> <span th:text="${movie.imdbID}">IMDb ID</span>
+                        <strong>TMDB ID:</strong> <span th:text="${movie.tmdbID}">TMDB ID</span>
+                    </div>
+                    
+                    <!-- View Full Details Button -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <button class="home-btn" onclick="toggleDetails()" id="detailsBtn">View Full Details</button>
+                    </div>
+
+                    <!-- Full Details Section (Initially Hidden) -->
+                    <div id="fullDetails" style="display: none; background-color: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                        <h3 style="color: #e50914; margin-bottom: 1rem;">Full Details</h3>
+                        <div style="color: white; line-height: 1.8;">
+                            <p th:if="${movie.year}"><strong>Release Year:</strong> <span th:text="${movie.year}">Year</span></p>
+                            <p th:if="${movie.tmdbRating != null and movie.tmdbRating != 'N/A'}"><strong>TMDB Rating:</strong> <span th:text="${movie.tmdbRating}">Rating</span></p>
+                            <p th:if="${movie.director != null and movie.director != 'N/A'}"><strong>Director:</strong> <span th:text="${movie.director}">Director</span></p>
+                            <p th:if="${movie.actors != null and movie.actors != 'N/A'}"><strong>Cast:</strong> <span th:text="${movie.actors}">Cast</span></p>
+                        </div>
                     </div>
                 </div>
 
@@ -63,10 +79,18 @@
                 </div>
 
                 <!-- Rating Section -->
-                <div class="results-container">
+                <div class="results-container" style="margin-bottom: 2rem;">
                     <h2>Rate this Movie</h2>
-                    <p style="color: #aaa; font-size: 0.9rem; font-style: italic;">Rating functionality not yet
-                        complete.</p>
+                    <div class="rating-widget" style="margin-top: 1rem;">
+                        <div class="stars-display" id="starsDisplay" style="font-size: 2rem; cursor: pointer; user-select: none;">
+                            <span class="star" data-value="1">☆</span>
+                            <span class="star" data-value="2">☆</span>
+                            <span class="star" data-value="3">☆</span>
+                            <span class="star" data-value="4">☆</span>
+                            <span class="star" data-value="5">☆</span>
+                        </div>
+                        <div id="ratingMessage" style="margin-top: 0.5rem; color: #4CAF50; font-size: 0.9rem; display: none;"></div>
+                    </div>
                 </div>
 
                 <!-- Providers Section -->
@@ -125,36 +149,121 @@
         </div>
     </main>
     <script>
-        function autoRateMovie() {
-            // Get ID
-            const movieIdVal = document.getElementById("movieIdField").value;
+        function toggleDetails() {
+            const detailsDiv = document.getElementById('fullDetails');
+            const btn = document.getElementById('detailsBtn');
+            if (detailsDiv.style.display === 'none') {
+                detailsDiv.style.display = 'block';
+                btn.textContent = 'Hide Full Details';
+            } else {
+                detailsDiv.style.display = 'none';
+                btn.textContent = 'View Full Details';
+            }
+        }
 
-            // Get CSRF Token from meta tags
+        // Star rating functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star');
+            const movieId = document.getElementById('movieIdField').value;
+            const ratingMessage = document.getElementById('ratingMessage');
+            let currentRating = 0;
+
+            stars.forEach(star => {
+                // Hover effect
+                star.addEventListener('mouseenter', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    highlightStars(value);
+                });
+
+                // Click to rate
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    currentRating = value;
+                    highlightStars(value);
+                    saveRating(movieId, value);
+                });
+            });
+
+            // Reset to current rating on mouse leave
+            document.getElementById('starsDisplay').addEventListener('mouseleave', function() {
+                highlightStars(currentRating);
+            });
+
+            function highlightStars(count) {
+                stars.forEach(star => {
+                    const value = parseInt(star.getAttribute('data-value'));
+                    if (value <= count) {
+                        star.textContent = '★';
+                        star.style.color = '#ffd700';
+                    } else {
+                        star.textContent = '☆';
+                        star.style.color = '#fff';
+                    }
+                });
+            }
+
+            function saveRating(movieId, rating) {
+                const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+                const formData = new URLSearchParams();
+                formData.append('movieId', movieId);
+                formData.append('rating', rating);
+
+                fetch('/rate-movie', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        ratingMessage.textContent = `✓ Rated ${rating} star${rating > 1 ? 's' : ''}`;
+                        ratingMessage.style.display = 'block';
+                        setTimeout(() => {
+                            ratingMessage.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        ratingMessage.textContent = '✗ Error saving rating';
+                        ratingMessage.style.color = '#f44336';
+                        ratingMessage.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    ratingMessage.textContent = '✗ Network error';
+                    ratingMessage.style.color = '#f44336';
+                    ratingMessage.style.display = 'block';
+                });
+            }
+        });
+
+        function autoRateMovie() {
+            // This function is called when clicking on streaming providers
+            const movieId = document.getElementById("movieIdField").value;
             const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
             const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
 
-            const payload = {
-                movieId: movieIdVal,
-                rating: 3.0
-            };
+            const formData = new URLSearchParams();
+            formData.append('movieId', movieId);
+            formData.append('rating', 3.0);
 
-            // Send to the backend with the security Header
-            fetch('/api/rate', {
+            fetch('/rate-movie', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                     [csrfHeader]: csrfToken
                 },
-                body: JSON.stringify(payload)
+                body: formData
             })
-                .then(response => {
-                    if (response.ok) {
-                        console.log("Auto-rating success: 3 stars assigned to ID " + movieIdVal);
-                    } else {
-                        console.error("Error saving rating: Status " + response.status);
-                    }
-                })
-                .catch(error => console.error("Network error:", error));
+            .then(response => {
+                if (response.ok) {
+                    console.log("Auto-rating success: 3 stars assigned");
+                }
+            })
+            .catch(error => console.error("Error:", error));
         }
     </script>
 </body>
