@@ -2,15 +2,14 @@ package com.project.recommendation_engine.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.project.recommendation_engine.service.RecommendationAgentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.project.recommendation_engine.model.TMDBResponse;
 import com.project.recommendation_engine.model.UserRecommendation;
@@ -25,12 +24,12 @@ public class HomeController {
 
     @Autowired
     private TMDBService tmdbService;
-    
     @Autowired
     private UserService userService;
-
     @Autowired
     private RecommendationRepository recommendationRepository;
+    @Autowired
+    private RecommendationAgentService agentService;
 
     @GetMapping("/home")
     public String home(Model model, HttpSession session, @RequestParam(value = "refresh", required = false) String refresh){
@@ -73,10 +72,11 @@ public class HomeController {
         }
 
         List<UserRecommendation.RecSection> recommendationSections = new ArrayList<>();
+        String userId = null;
 
         try {
             // Get user's ID based on its username
-            String userId = userService.getUserIdByUsername(currentUsername);
+            userId = userService.getUserIdByUsername(currentUsername);
 
             // Search most recent recommendation into 'recommended_cache' collection
             var recommendationOpt = recommendationRepository.findFirstByUserIdOrderByGeneratedAtDesc(userId);
@@ -95,6 +95,7 @@ public class HomeController {
 
         // This variable "recommendationSections" is the one we will loop now in the HTML
         model.addAttribute("recommendationSections", recommendationSections);
+        model.addAttribute("userId", userId);
 
         return "home";
     }
@@ -151,6 +152,19 @@ public class HomeController {
         } catch (Exception e) {
             System.err.println("Error saving rating: " + e.getMessage());
             return org.springframework.http.ResponseEntity.status(500).body("Error saving rating");
+        }
+    }
+
+    @PostMapping("/api/trigger-demo-agent")
+    @ResponseBody
+    public ResponseEntity<String> triggerDemoAgent(@RequestParam String userId) {
+
+        boolean success = agentService.runAgentForUserSync(userId);
+
+        if (success) {
+            return ResponseEntity.ok("Recommendations Updated");
+        } else {
+            return ResponseEntity.status(500).body("Error executing agent");
         }
     }
 }

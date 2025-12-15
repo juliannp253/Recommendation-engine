@@ -13,7 +13,10 @@ public class RecommendationAgentService {
     @Value("${app.python.script-path:./python_agent/batch_processor.py}")
     private String SCRIPT_PATH;
 
-    private final String PYTHON_CMD = "python3";
+    @Value("${app.python.command:python3}")
+    private String pythonCommand;
+
+    //private final String PYTHON_CMD = "python3";
 
     @Async("taskExecutor") // Thread's pool defined on AsyncConfig
     public void triggerRecommendationForUser(String userId) {
@@ -23,7 +26,7 @@ public class RecommendationAgentService {
         try {
             // Build command: python batch_processor.py --user_id XXXXX
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    PYTHON_CMD,
+                    pythonCommand,
                     SCRIPT_PATH,
                     "--user_id",
                     userId
@@ -67,11 +70,11 @@ public class RecommendationAgentService {
         try {
             // Build command without argument: --user_id
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    PYTHON_CMD,
+                    pythonCommand,
                     SCRIPT_PATH
             );
 
-            processBuilder.directory(new java.io.File("D:\\OneDrive\\Escritorio\\UNIVERSITY\\FALL2025\\Senior Project\\movie-agent"));
+            // processBuilder.directory(new java.io.File("D:\\OneDrive\\Escritorio\\UNIVERSITY\\FALL2025\\Senior Project\\movie-agent"));
 
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
@@ -94,6 +97,37 @@ public class RecommendationAgentService {
         } catch (Exception e) {
             System.err.println("[Scheduler] Fatal Error: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public boolean runAgentForUserSync(String userId) {
+        System.out.println("[Demo] Running Synchronous Python Agent for User: " + userId);
+
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    pythonCommand,
+                    SCRIPT_PATH,
+                    "--user_id",
+                    userId
+            );
+
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("   [Python Demo]: " + line);
+            }
+
+            int exitCode = process.waitFor();
+
+            return exitCode == 0;
+
+        } catch (Exception e) {
+            System.err.println("[Demo] Error running script: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
     }
 }

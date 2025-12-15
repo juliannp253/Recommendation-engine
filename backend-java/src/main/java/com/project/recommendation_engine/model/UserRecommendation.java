@@ -14,7 +14,6 @@ public class UserRecommendation {
     @Field("user_id")
     private String userId;
 
-    // --- ESTE FUE EL CAMPO QUE FALTABA ---
     @Field("generated_at")
     private String generatedAt;
     // -------------------------------------
@@ -28,7 +27,6 @@ public class UserRecommendation {
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
 
-    // Getter y Setter para el campo nuevo
     public String getGeneratedAt() { return generatedAt; }
     public void setGeneratedAt(String generatedAt) { this.generatedAt = generatedAt; }
 

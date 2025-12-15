@@ -120,7 +120,7 @@ public class TMDBService {
         RestTemplate restTemplate = new RestTemplate();
         String url;
 
-        // CASO 1: ID de IMDb (empieza con "tt")
+        // CASE 1: ID IMDb (starts with "tt")
         if (titleOrId.startsWith("tt")) {
             url = String.format("%s/find/%s?api_key=%s&external_source=imdb_id", baseUrl, titleOrId, apiKey);
             try {
@@ -135,7 +135,7 @@ public class TMDBService {
             }
         }
 
-        // CASO 2: ID Numérico (TMDB ID) - Usado por tus recomendaciones nuevas
+        // CASE 2: Numbr ID (TMDB ID)
         try {
             Long movieId = Long.parseLong(titleOrId);
             url = String.format("%s/movie/%d?api_key=%s&append_to_response=credits", baseUrl, movieId, apiKey);
@@ -143,8 +143,7 @@ public class TMDBService {
             return mapTmdbToMovieResponse(tmdbMovie);
 
         } catch (NumberFormatException e) {
-            // CASO 3: Búsqueda por Título (Si no es número ni empieza con tt)
-            // Solo entra aquí si NO empezó con "tt"
+            // CASE 3: Nor tt non numeric
             if (!titleOrId.startsWith("tt")) {
                 url = String.format("%s/search/movie?api_key=%s&query=%s",
                         baseUrl, apiKey, titleOrId.replace(" ", "%20"));
@@ -162,7 +161,6 @@ public class TMDBService {
         } catch (Exception e) {
             System.err.println("Error fetching movie details: " + e.getMessage());
         }
-
         return null;
     }
 

@@ -260,3 +260,33 @@ form button[type="submit"] {
     width: 100%;
     margin-top: 1rem;
 }
+
+
+.magic-button {
+    background: linear-gradient(45deg, #ff00cc, #3333ff);
+    border: none;
+    padding: 12px 24px;
+    color: white;
+    border-radius: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 0, 204, 0.4);
+    transition: transform 0.2s;
+}
+.magic-button:hover {
+    transform: scale(1.05);
+}
+
+/* Spinner */
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #ff00cc;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

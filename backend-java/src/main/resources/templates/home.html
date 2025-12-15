@@ -3,14 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <title>Home - Movie App</title>
+
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Relative Container */
+        .hero-section {
+            position: relative;
+        }
+
+        /* Arrow Style */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            font-size: 2.5rem;
+            padding: 10px 15px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            user-select: none;
+            border-radius: 5px;
+        }
+
+        .nav-arrow:hover {
+            background-color: rgba(239, 239, 239, 0.6); /* Color mouseover */
+            transform: translateY(-50%) scale(1.1); /* Pop Effect */
+        }
+
+        /* Positions */
+        .prev-arrow { left: 20px; }
+        .next-arrow { right: 20px; }
+    </style>
 </head>
 <body>
 <header class="hero-section" id="hero-container"
         th:style="'background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), #0d0d0d), url(' + @{/images/placeholder_bg.jpg} + ');'">
+
+    <button class="nav-arrow prev-arrow" onclick="prevSlide()">&#10094;</button>
 
     <img id="hero-poster" th:src="@{/images/placeholder.png}" alt="Featured Movie" class="hero-poster" style="transition: opacity 0.5s ease-in-out;" />
 
@@ -23,6 +62,8 @@
 
         <a id="hero-btn" href="#" class="watch-btn">View Details</a>
     </div>
+
+    <button class="nav-arrow next-arrow" onclick="nextSlide()">&#10095;</button>
 </header>
 
 <nav class="top-navbar">
@@ -71,6 +112,19 @@
         </section>
     </div>
 
+    <div style="text-align: center; margin: 20px 0;">
+        <button onclick="runDemoAgent()" class="magic-button">
+            Update Recommendations (Demo)
+        </button>
+    </div>
+
+    <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; justify-content:center; align-items:center; color:white;">
+        <div class="loader"></div>
+        <h2 style="margin-top: 20px;">Running AI Agent...</h2>
+        <p>Analyzing your new ratings...</p>
+        <p>Generating personalized list...</p>
+    </div>
+
     <section class="movie-category" th:if="${recommendationSections == null or recommendationSections.isEmpty()}">
         <p style="color: white; text-align: center;">Generating your personalized recommendations...</p>
     </section>
@@ -81,14 +135,12 @@
 
     var recommendationSections = /*[[${recommendationSections}]]*/ null;
     var trendingMovies = /*[[${trendingMoviesList}]]*/ null;
-
     var heroMovies = [];
 
 
     if (recommendationSections && recommendationSections.length > 0) {
         heroMovies = recommendationSections[0].movies;
     }
-
     else if (trendingMovies && trendingMovies.length > 0) {
         heroMovies = trendingMovies.map(m => ({
             id: m.ImdbID || m.id,
@@ -98,36 +150,107 @@
         }));
     }
 
+    let currentIndex = 0;
+    let autoSlideInterval;
+
+    const posterEl = document.getElementById('hero-poster');
+    const titleEl = document.getElementById('hero-title');
+    const descEl = document.getElementById('hero-desc');
+    const btnEl = document.getElementById('hero-btn');
+
+    function showHeroMovie(index) {
+        if (heroMovies.length === 0) return;
+
+        // LOOP
+        if (index >= heroMovies.length) currentIndex = 0;
+        else if (index < 0) currentIndex = heroMovies.length - 1;
+        else currentIndex = index;
+
+        const movie = heroMovies[currentIndex];
+
+        // Fade Out
+        posterEl.style.opacity = 0;
+
+        setTimeout(() => {
+            // Update Content
+            posterEl.src = movie.posterPath;
+            titleEl.textContent = movie.title;
+            descEl.textContent = movie.aiReason ? '"' + movie.aiReason + '"' : "Recommended for you.";
+
+            // Use ID for link
+            btnEl.href = '/movie/' + movie.id;
+
+            // Fade In
+            posterEl.style.opacity = 1;
+        }, 300);
+    }
+
+    function nextSlide() {
+        showHeroMovie(currentIndex + 1);
+        resetTimer(); // Restart counter
+    }
+
+    function prevSlide() {
+        showHeroMovie(currentIndex - 1);
+        resetTimer(); // Restart counter
+    }
+
+    function resetTimer() {
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(() => {
+            showHeroMovie(currentIndex + 1);
+        }, 7500); // 7.5 sec
+    }
+
+    // Initialize
     if (heroMovies.length > 0) {
-        let currentIndex = 0;
-
-        const posterEl = document.getElementById('hero-poster');
-        const titleEl = document.getElementById('hero-title');
-        const descEl = document.getElementById('hero-desc');
-        const btnEl = document.getElementById('hero-btn');
-        const containerEl = document.getElementById('hero-container');
-
-        function updateHero() {
-            const movie = heroMovies[currentIndex];
-
-            posterEl.style.opacity = 0;
-
-            setTimeout(() => {
-                posterEl.src = movie.posterPath;
-                titleEl.textContent = movie.title;
-                descEl.textContent = movie.aiReason ? '"' + movie.aiReason + '"' : "Recommended for you.";
-                btnEl.href = '/movie/' + movie.id;
-
-                posterEl.style.opacity = 1;
-            }, 500);
-
-            currentIndex = (currentIndex + 1) % heroMovies.length;
-        }
-
-        updateHero();
-        setInterval(updateHero, 7500);
+        showHeroMovie(0); // Show first
+        resetTimer();     // Start timer
     }
     /*]]>*/
+
+    function runDemoAgent() {
+        // 1. Get User ID
+        /*<![CDATA[*/
+        const userId = /*[[${userId}]]*/ 'UserNotFound';
+        /*]]>*/
+
+        if (!userId) {
+            alert("Error: User ID not found in view.");
+            return;
+        }
+
+        // 2. Show load page
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.style.display = 'flex';
+
+        // 3. Get CSRF token
+        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+        // 4. Call the backend
+        fetch('/api/trigger-demo-agent?userId=' + userId, {
+            method: 'POST',
+            headers: {
+                [csrfHeader]: csrfToken
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // 5. Succesful: Reload page to see changes
+                console.log("Agent finished!");
+                window.location.reload();
+            } else {
+                alert("Error running agent.");
+                overlay.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Network error.");
+            overlay.style.display = 'none';
+        });
+    }
 </script>
 
 </body>
