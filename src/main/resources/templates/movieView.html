@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Details</title>
+    <link rel="stylesheet" th:href="@{/css/search.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+</head>
+
+<body>
+    <input type="hidden" id="movieIdField" th:value="${movie.tmdbID}" />
+    <!-- Header -->
+    <header class="search-header">
+        <h1 th:text="${movie.title}">Movie Details</h1>
+        <a th:href="@{/home}" class="home-btn">← Back to Home</a>
+    </header>
+
+    <!-- Main Movie Content -->
+    <main class="search-main">
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem; align-items: start;">
+
+            <!-- Movie Poster Section -->
+            <div>
+                <img th:if="${movie.poster != 'N/A'}" th:src="${movie.poster}" th:alt="${movie.title}"
+                    style="width: 100%; max-width: 300px; height: auto; border-radius: 10px;">
+                <div th:if="${movie.poster == 'N/A'}"
+                    style="width: 300px; height: 450px; background-color: #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #999;">
+                    No Poster Available
+                </div>
+            </div>
+
+            <!-- Movie Information Section -->
+            <div>
+                <!-- Movie Metadata -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <span th:if="${movie.year}"
+                            style="background-color: red; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
+                            th:text="${movie.year}">Year</span>
+                        <span th:if="${movie.genre}"
+                            style="background-color: teal; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
+                            th:text="${movie.genre}">Genre</span>
+                        <span th:if="${movie.tmdbRating != 'N/A'}"
+                            style="background-color: yellow; color: #000; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;"
+                            th:text="'TMDB: ' + ${movie.tmdbRating}">TMDB Rating</span>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem; color: white;">
+                        <strong>TMDB ID:</strong> <span th:text="${movie.tmdbID}">TMDB ID</span>
+                    </div>
+                    
+                    <!-- View Full Details Button -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <button class="home-btn" onclick="toggleDetails()" id="detailsBtn">View Full Details</button>
+                    </div>
+
+                    <!-- Full Details Section (Initially Hidden) -->
+                    <div id="fullDetails" style="display: none; background-color: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                        <h3 style="color: #e50914; margin-bottom: 1rem;">Full Details</h3>
+                        <div style="color: white; line-height: 1.8;">
+                            <p th:if="${movie.year}"><strong>Release Year:</strong> <span th:text="${movie.year}">Year</span></p>
+                            <p th:if="${movie.tmdbRating != null and movie.tmdbRating != 'N/A'}"><strong>TMDB Rating:</strong> <span th:text="${movie.tmdbRating}">Rating</span></p>
+                            <p th:if="${movie.director != null and movie.director != 'N/A'}"><strong>Director:</strong> <span th:text="${movie.director}">Director</span></p>
+                            <p th:if="${movie.actors != null and movie.actors != 'N/A'}"><strong>Cast:</strong> <span th:text="${movie.actors}">Cast</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plot Section -->
+                <div th:if="${movie.plot != 'N/A'}" class="results-container" style="margin-bottom: 2rem;">
+                    <h2>Plot</h2>
+                    <p th:text="${movie.plot}">Movie plot description goes here.</p>
+                </div>
+
+                <!-- Rating Section -->
+                <div class="results-container" style="margin-bottom: 2rem;">
+                    <h2>Rate this Movie</h2>
+                    <div class="rating-widget" style="margin-top: 1rem;">
+                        <div class="stars-display" id="starsDisplay" style="font-size: 2rem; cursor: pointer; user-select: none;">
+                            <span class="star" data-value="1">☆</span>
+                            <span class="star" data-value="2">☆</span>
+                            <span class="star" data-value="3">☆</span>
+                            <span class="star" data-value="4">☆</span>
+                            <span class="star" data-value="5">☆</span>
+                        </div>
+                        <div id="ratingMessage" style="margin-top: 0.5rem; color: #4CAF50; font-size: 0.9rem; display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Providers Section -->
+                <div class="providers-section"
+                     th:if="${not #lists.isEmpty(movie.flatrateProviders) or not #lists.isEmpty(movie.rentProviders) or not #lists.isEmpty(movie.buyProviders)}">
+
+                    <div class="provider-category" th:if="${not #lists.isEmpty(movie.flatrateProviders)}">
+                        <h3>Stream</h3>
+                        <div class="provider-grid">
+                            <a th:each="provider : ${movie.flatrateProviders}"
+                               th:href="${movie.watchLink}"
+                               target="_blank"
+                               onclick="autoRateMovie()"
+                               style="text-decoration: none;">
+                                <img th:src="${provider.logoUrl}"
+                                     th:alt="${provider.name}"
+                                     th:title="'Watch on ' + ${provider.name}"
+                                     class="provider-logo">
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="provider-category" th:if="${not #lists.isEmpty(movie.rentProviders)}">
+                        <h3>Rent</h3>
+                        <div class="provider-grid">
+                            <a th:each="provider : ${movie.rentProviders}"
+                               th:href="${movie.watchLink}"
+                               target="_blank"
+                               onclick="autoRateMovie()"
+                               style="text-decoration: none;">
+                                <img th:src="${provider.logoUrl}"
+                                     th:alt="${provider.name}"
+                                     th:title="'Rent on ' + ${provider.name}"
+                                     class="provider-logo">
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="provider-category" th:if="${not #lists.isEmpty(movie.buyProviders)}">
+                        <h3>Buy</h3>
+                        <div class="provider-grid">
+                            <a th:each="provider : ${movie.buyProviders}"
+                               th:href="${movie.watchLink}"
+                               target="_blank"
+                               onclick="autoRateMovie()"
+                               style="text-decoration: none;">
+                                <img th:src="${provider.logoUrl}"
+                                     th:alt="${provider.name}"
+                                     th:title="'Buy on ' + ${provider.name}"
+                                     class="provider-logo">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggleDetails() {
+            const detailsDiv = document.getElementById('fullDetails');
+            const btn = document.getElementById('detailsBtn');
+            if (detailsDiv.style.display === 'none') {
+                detailsDiv.style.display = 'block';
+                btn.textContent = 'Hide Full Details';
+            } else {
+                detailsDiv.style.display = 'none';
+                btn.textContent = 'View Full Details';
+            }
+        }
+
+        // Star rating functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star');
+            const movieId = document.getElementById('movieIdField').value;
+            const ratingMessage = document.getElementById('ratingMessage');
+            let currentRating = 0;
+
+            stars.forEach(star => {
+                // Hover effect
+                star.addEventListener('mouseenter', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    highlightStars(value);
+                });
+
+                // Click to rate
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    currentRating = value;
+                    highlightStars(value);
+                    saveRating(movieId, value);
+                });
+            });
+
+            // Reset to current rating on mouse leave
+            document.getElementById('starsDisplay').addEventListener('mouseleave', function() {
+                highlightStars(currentRating);
+            });
+
+            function highlightStars(count) {
+                stars.forEach(star => {
+                    const value = parseInt(star.getAttribute('data-value'));
+                    if (value <= count) {
+                        star.textContent = '★';
+                        star.style.color = '#ffd700';
+                    } else {
+                        star.textContent = '☆';
+                        star.style.color = '#fff';
+                    }
+                });
+            }
+
+            function saveRating(movieId, rating) {
+                const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+                const formData = new URLSearchParams();
+                formData.append('movieId', movieId);
+                formData.append('rating', rating);
+
+                fetch('/rate-movie', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        ratingMessage.textContent = `✓ Rated ${rating} star${rating > 1 ? 's' : ''}`;
+                        ratingMessage.style.display = 'block';
+                        setTimeout(() => {
+                            ratingMessage.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        ratingMessage.textContent = '✗ Error saving rating';
+                        ratingMessage.style.color = '#f44336';
+                        ratingMessage.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    ratingMessage.textContent = '✗ Network error';
+                    ratingMessage.style.color = '#f44336';
+                    ratingMessage.style.display = 'block';
+                });
+            }
+        });
+
+        function autoRateMovie() {
+            // This function is called when clicking on streaming providers
+            const movieId = document.getElementById("movieIdField").value;
+            const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+            const formData = new URLSearchParams();
+            formData.append('movieId', movieId);
+            formData.append('rating', 3.0);
+
+            fetch('/rate-movie', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader]: csrfToken
+                },
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Auto-rating success: 3 stars assigned");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+
+</html>

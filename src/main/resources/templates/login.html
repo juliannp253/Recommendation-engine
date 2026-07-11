@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Movie App</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="hero-section">
+        <div class="hero-info">
+            <h1 class="movie-title">Welcome Back</h1>
+            <p class="movie-synopsis">
+                Sign in to access your movie recommendations.
+            </p>
+        </div>
+    </header>
+
+    <!-- Navbar -->
+    <nav class="top-navbar">
+        <ul>
+            <!--li><a href="/home">Home</a></li>
+        <li><a href="/login">Login</a></li-->
+            <li><a href="/register">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Login Form -->
+    <main>
+        <div class="movie-category" style="text-align: center;">
+            <form method="POST" th:action="@{/login}">
+                <h2>Sign In</h2>
+
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="username" required>
+                </div>
+                <br>
+                <div>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <br>
+                <button type="submit" class="watch-btn">Sign In</button>
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - Movie Recommendation Engine</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="top-navbar">
+        <ul>
+            <li><a th:href="@{/home}">Home</a></li>
+            <li><a href="#">Filter</a></li>
+            <li><a th:href="@{/search}">Search</a></li>
+            <li>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="logout-button">
+                        Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Profile Content -->
+    <main>
+        <!-- Account Information Section -->
+        <section class="movie-category">
+            <h2>Account Information</h2>
+            <div style="background-color: #1c1c1c; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <p style="margin-bottom: 0.8rem; font-size: 1.1rem;">
+                    <strong style="color: #e50914;">Username:</strong>
+                    <span th:text="${username}">User Name</span>
+                </p>
+                <p style="margin-bottom: 0; font-size: 1.1rem;">
+                    <strong style="color: #e50914;">Email:</strong>
+                    <span th:text="${email}">user@example.com</span>
+                </p>
+            </div>
+        </section>
+
+        <!-- Favorite Genres Section -->
+        <section class="movie-category">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="margin-bottom: 0;">Your Favorite Genres</h2>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="watch-btn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">
+                        Add Genres
+                    </button>
+                    <button class="watch-btn"
+                        style="padding: 0.6rem 1.2rem; font-size: 0.9rem; background-color: #666;">
+                        Remove Genres
+                    </button>
+                </div>
+            </div>
+
+            <div class="carousel" th:if="${favoriteGenres != null and !favoriteGenres.isEmpty()}">
+                <div class="movie-card" th:each="genre : ${favoriteGenres}"
+                    style="min-width: 180px; height: 100px; font-size: 1.2rem; font-weight: bold;">
+                    <span th:text="${genre}">Genre</span>
+                </div>
+            </div>
+
+            <div th:if="${favoriteGenres == null or favoriteGenres.isEmpty()}"
+                style="background-color: #1c1c1c; padding: 2rem; border-radius: 8px; text-align: center;">
+                <p style="color: #999; font-size: 1.1rem;">You haven't selected any favorite genres yet.</p>
+            </div>
+        </section>
+    </main>
+
+</body>
+
+</html>

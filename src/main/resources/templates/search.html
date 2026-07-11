@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search Movies - Movie App</title>
+    <link rel="stylesheet" th:href="@{/css/search.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="search-header">
+        <h1>Search Movies</h1>
+        <a th:href="@{/home}" class="home-btn">← Back to Home</a>
+    </header>
+
+    <!-- Search Form -->
+    <main class="search-main">
+        <section class="search-section">
+            <form th:action="@{/search}" method="post" class="search-form">
+                <div class="search-input-container">
+                    <input type="text" name="movieTitle" placeholder="Enter movie title or IMDB id..."
+                        class="search-input" th:value="${searchQuery}" required>
+                    <button type="submit" class="search-btn">Search</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Search Results -->
+        <section class="results-section" th:if="${searchResults}">
+            <h2>Search Results</h2>
+            <div class="results-container">
+                <div th:if="${movie}">
+                    <input type="hidden" id="searchMovieId" th:value="${movie.tmdbID}" />
+                    <div class="movie-details" style="display: flex; gap: 20px; align-items: flex-start;">
+                        <img th:src="${movie.poster}" alt="Movie Poster" class="movie-poster"
+                            style="width: 200px; flex-shrink: 0; border-radius: 8px;" />
+                        <div class="movie-info" style="flex: 1;">
+                            <h3 th:text="${movie.title}"></h3>
+                            <p><strong>Year:</strong> <span th:text="${movie.year}"></span></p>
+                            <p><strong>Genre:</strong> <span th:text="${movie.genre}"></span></p>
+                            
+                            <!-- Rating Widget -->
+                            <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                                <strong>Rate this movie:</strong>
+                                <div class="rating-widget" style="margin-top: 0.5rem;">
+                                    <div class="stars-display" id="searchStarsDisplay" style="font-size: 1.5rem; cursor: pointer; user-select: none;">
+                                        <span class="search-star" data-value="1">☆</span>
+                                        <span class="search-star" data-value="2">☆</span>
+                                        <span class="search-star" data-value="3">☆</span>
+                                        <span class="search-star" data-value="4">☆</span>
+                                        <span class="search-star" data-value="5">☆</span>
+                                    </div>
+                                    <div id="searchRatingMessage" style="margin-top: 0.5rem; color: #4CAF50; font-size: 0.9rem; display: none;"></div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 1rem;">
+                                <button class="home-btn" onclick="toggleSearchDetails()" id="searchDetailsBtn">View Full Details</button>
+                            </div>
+                            
+                            <!-- Full Details Section (Initially Hidden) -->
+                            <div id="searchFullDetails" style="display: none; background-color: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; margin-bottom: 1rem;">
+                                <h3 style="color: #e50914; margin-bottom: 1rem;">Full Details</h3>
+                                <div style="color: white; line-height: 1.8;">
+                                    <p th:if="${movie.year}"><strong>Release Year:</strong> <span th:text="${movie.year}">Year</span></p>
+                                    <p th:if="${movie.tmdbRating != null and movie.tmdbRating != 'N/A'}"><strong>TMDB Rating:</strong> <span th:text="${movie.tmdbRating}">Rating</span></p>
+                                    <p th:if="${movie.director != null and movie.director != 'N/A'}"><strong>Director:</strong> <span th:text="${movie.director}">Director</span></p>
+                                    <p th:if="${movie.actors != null and movie.actors != 'N/A'}"><strong>Cast:</strong> <span th:text="${movie.actors}">Cast</span></p>
+                                </div>
+                            </div>
+                            
+                            <p><strong>Plot:</strong> <span th:text="${movie.plot}"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div th:unless="${movie}">
+                    <p th:text="${searchResults}"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- No results message when no search has been performed -->
+        <section class="no-search-section" th:unless="${searchResults}">
+            <p>Enter a movie title above to search for movies.</p>
+        </section>
+    </main>
+    
+    <script>
+        function toggleSearchDetails() {
+            const detailsDiv = document.getElementById('searchFullDetails');
+            const btn = document.getElementById('searchDetailsBtn');
+            if (detailsDiv.style.display === 'none') {
+                detailsDiv.style.display = 'block';
+                btn.textContent = 'Hide Full Details';
+            } else {
+                detailsDiv.style.display = 'none';
+                btn.textContent = 'View Full Details';
+            }
+        }
+
+        // Star rating functionality for search page
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.search-star');
+            const movieIdField = document.getElementById('searchMovieId');
+            
+            if (!movieIdField || stars.length === 0) {
+                return; // No movie to rate
+            }
+
+            const movieId = movieIdField.value;
+            const ratingMessage = document.getElementById('searchRatingMessage');
+            let currentRating = 0;
+
+            stars.forEach(star => {
+                // Hover effect
+                star.addEventListener('mouseenter', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    highlightStars(value);
+                });
+
+                // Click to rate
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    currentRating = value;
+                    highlightStars(value);
+                    saveRating(movieId, value);
+                });
+            });
+
+            // Reset to current rating on mouse leave
+            document.getElementById('searchStarsDisplay').addEventListener('mouseleave', function() {
+                highlightStars(currentRating);
+            });
+
+            function highlightStars(count) {
+                stars.forEach(star => {
+                    const value = parseInt(star.getAttribute('data-value'));
+                    if (value <= count) {
+                        star.textContent = '★';
+                        star.style.color = '#ffd700';
+                    } else {
+                        star.textContent = '☆';
+                        star.style.color = '#fff';
+                    }
+                });
+            }
+
+            function saveRating(movieId, rating) {
+                const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+                const formData = new URLSearchParams();
+                formData.append('movieId', movieId);
+                formData.append('rating', rating);
+
+                fetch('/search/rate-movie', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        ratingMessage.textContent = `✓ Rated ${rating} star${rating > 1 ? 's' : ''}`;
+                        ratingMessage.style.display = 'block';
+                        setTimeout(() => {
+                            ratingMessage.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        ratingMessage.textContent = '✗ Error saving rating';
+                        ratingMessage.style.color = '#f44336';
+                        ratingMessage.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    ratingMessage.textContent = '✗ Network error';
+                    ratingMessage.style.color = '#f44336';
+                    ratingMessage.style.display = 'block';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

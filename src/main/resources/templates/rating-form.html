@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <link th:href="@{/css/rating-form.css}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="rating-container">
+        <h2>Help us get to know you more.</h2>
+        <p class="instruction">Click on the posters of the movies you have seen and rate them (1 to 5).</p>
+
+        <div id="visual-content-container">
+
+            <div th:each="genre : ${genresWithMovies}" class="genre-section">
+                <h3 th:text="${genre.genreName}">GENRE PLACEHOLDER</h3>
+
+                <div class="movie-carousel">
+                    <div th:each="movie : ${genre.movies}" class="movie-card" th:data-movie-id="${movie.id}">
+
+                        <div class="poster-wrapper">
+                            <img th:src="${movie.posterUrl}" th:alt="${movie.title}" class="movie-poster"
+                                data-action="select-movie">
+                            <div class="selection-check">✓</div>
+                        </div>
+                        <p class="movie-title" th:text="${movie.title}">Movie Title Placeholder</p>
+                        <div class="rating-controls" style="display: none;">
+                            <span class="rating-label">Rating:</span>
+                        </div>
+
+                        <input type="hidden" th:name="'rating_' + ${movie.id}" th:id="'rating_' + ${movie.id}" value="0"
+                            class="rating-input-source">
+                    </div>
+                </div>
+            </div>
+
+            <section class="manual-search-section">
+                <h3>Looking for another movie?:</h3>
+
+                <div id="manual-search-container" class="search-form-manual">
+                    <div class="search-input-group">
+                        <input type="text" id="manualTitle" placeholder="Eg. Titanic" required>
+                        <button type="button" id="search-manual-btn" class="search-manual-btn">Search Movie</button>
+                    </div>
+                </div>
+
+                <div id="manual-search-results"></div>
+            </section>
+
+            <section class="manual-rated-section">
+                <h3>My Manually Rated Movies:</h3>
+                <div id="rated-movies-list" class="movie-carousel">
+                </div>
+            </section>
+        </div>
+
+        <form th:action="@{/rating-form/save-initial-ratings}" method="post" id="rating-form">
+
+            <div id="input-container-for-submission" style="display:none;"></div>
+
+            <p class="error" id="error-msg" style="display:none;">Please rate at least 5 movies.</p>
+
+            <input type="hidden" name="userId" th:value="${userId}">
+            <input type="submit" value="Finish & Start Watching">
+        </form>
+    </div>
+    <script th:src="@{/js/rating-script.js}"></script>
+</body>
+
+</html>
