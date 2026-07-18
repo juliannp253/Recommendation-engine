@@ -1,12 +1,12 @@
 package com.project.recommendation_engine.service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.project.recommendation_engine.model.Rating;
 import com.project.recommendation_engine.model.User;
@@ -28,9 +28,6 @@ public class UserService {
         if(userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("This email already exists.");
         }
-        if(userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("This username already exists.");
-        }
         String hasshedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hasshedPassword);
 
@@ -38,16 +35,12 @@ public class UserService {
     }
 
     public void saveFavoriteGenres(String userId, List<String> genres) {
-        // Search User by ID
         Optional<User> userOptional = userRepository.findById(userId);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-
-            // Add Genres list to User
             user.setFavoriteGenres(genres);
 
-            // Save User into MongoDB
             userRepository.save(user);
         } else {
             throw new RuntimeException("User with ID " + userId + " not found.");
@@ -55,70 +48,57 @@ public class UserService {
     }
 
     public List<String> getFavoriteGenresByUserId(String userId) {
-        // User findById comes from MongoRepository
-        return userRepository.findById(userId)
-                .map(User::getFavoriteGenres)
-                .orElseThrow(() -> new RuntimeException("User not found or genres not set."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User " + userId + " not found."));
+
+        List<String> genres = user.getFavoriteGenres();
+        return genres != null ? genres : Collections.emptyList();
     }
 
-    public String getUserIdByUsername(String username) {
-        // Find user by username and return their ID
+    /*public String getUserIdByUsername(String username) {
+
         return userRepository.findByUsername(username)
                 .map(User::getId)
                 .orElseThrow(() -> new RuntimeException("User with username " + username + " not found."));
-    }
+    }*/
 
-    public List<String> getFavoriteGenresByUsername(String username) {
+    /*public List<String> getFavoriteGenresByUsername(String username) {
         // Find user by username and get their favorite genres
         return userRepository.findByUsername(username)
                 .map(User::getFavoriteGenres)
                 .orElseThrow(() -> new RuntimeException("User with username " + username + " not found or genres not set."));
-    }
+    }*/
 
-    public User findByUsername(String username) {
+    /*public User findByUsername(String username) {
         // Find user by username and return the User object
         return userRepository.findByUsername(username)
                 .orElse(null);
-    }
+    }*/
 
+    @Transactional
     public void addMovieRatings(String userId, List<Rating> newRatings) {
-        userRepository.findById(userId).ifPresent(user -> {
-
-            if (user.getMovieRatings() == null) {
-                user.setMovieRatings(new ArrayList<>());
-            }
-
-            user.getMovieRatings().addAll(newRatings);
-            userRepository.save(user);
-            recommendationAgentService.triggerRecommendationForUser(userId);
-        });
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User " + userId + " not found."));
+        user.getMovieRatings().addAll(newRatings);
+        userRepository.save(user);
+        recommendationAgentService.triggerRecommendationForUser(userId); // Implementar RabbitMQ
     }
 
-    public void addOrUpdateRating(String username, String movieId, Double ratingValue) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
+    @Transactional
+    public void addOrUpdateRating(String userId, String movieId, Double ratingValue) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User " + userId + " not found."));
 
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            List<Rating> ratings = user.getMovieRatings();
+        List<Rating> ratings = user.getMovieRatings();
 
-            if (ratings == null) {
-                ratings = new ArrayList<>();
-            }
+        ratings.removeIf(r -> r.getMovieId().equals(movieId));
 
-            // UPSERT: Delete if already exists to overwrite
-            ratings.removeIf(r -> r.getMovieId().equals(movieId));
+        Rating newRating = new Rating();
+        newRating.setMovieId(movieId);
+        newRating.setScore(ratingValue);
 
-            Rating newRating = new Rating();
-            newRating.setMovieId(movieId);
+        ratings.add(newRating);
 
-            newRating.setScore(ratingValue);
-
-            ratings.add(newRating);
-            user.setMovieRatings(ratings);
-            userRepository.save(user);
-
-        } else {
-            throw new RuntimeException("User not found.");
-        }
+        userRepository.save(user);
     }
 }

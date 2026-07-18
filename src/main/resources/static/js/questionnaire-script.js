@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const errorMsg = document.getElementById('error-msg');
 
         function validateSelections() {
-            // Count how many checkboxes are marked
             const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
 
             if (checkedCount === 0) {
@@ -22,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Add listener to every checked box
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
@@ -31,17 +29,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     this.checked = false;
 
-                    // Warining message
                     errorMsg.textContent = `Limit reached: You can only select ${MAX_SELECTIONS} genres.`;
                     errorMsg.style.display = 'block';
 
-                    // Hide message if there is no errors
                     setTimeout(() => {
                         errorMsg.style.display = 'none';
                     }, 1500);
 
                 } else {
-                    // Valid selection
                     errorMsg.style.display = 'none';
                 }
 

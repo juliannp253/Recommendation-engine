@@ -32,14 +32,14 @@ public class SearchController {
     @PostMapping("/search")
     public String searchMovies(@RequestParam("movieTitle") String movieTitle, Model model) {
         model.addAttribute("searchQuery", movieTitle);
-        TMDBResponse movieResult = (TMDBResponse) tmdbService.fetchRawMovieResponse(movieTitle); // Call the TMDBService
-        if (movieResult != null && "True".equals(movieResult.getResponse())) { // Check for successful response
+        TMDBResponse movieResult = (TMDBResponse) tmdbService.fetchRawMovieResponse(movieTitle);
+        if (movieResult != null && "True".equals(movieResult.getResponse())) {
             model.addAttribute("movie", movieResult);
             model.addAttribute("searchResults", "found");
         } else { 
             model.addAttribute("searchResults", "No results found for: " + movieTitle);
         }
-        return "search"; // render the search page again
+        return "search";
     }
 
     @PostMapping("/search/rate-movie")

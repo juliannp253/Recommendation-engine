@@ -41,19 +41,15 @@ public class QuestionnaireController {
     @PostMapping
     public String handleGenreSelection(
             @RequestParam String userId,
-            @RequestParam List<String> genres, // Get all genres selected and store them in a List
+            @RequestParam List<String> genres,
             RedirectAttributes redirectAttributes
     ) {
-        // 1. Store genres into object User in Mongo
         userService.saveFavoriteGenres(userId, genres);
-
-        // 2. Get a list of movies by each genre IN-PROGRESS
         List<GenreMovies> moviesForRating = tmdbService.fetchMoviesForGenres(genres);
 
         redirectAttributes.addFlashAttribute("genresWithMovies", moviesForRating);
         redirectAttributes.addAttribute("userId", userId);
 
-        // Redirect
         return "redirect:/rating-form";
     }
 }

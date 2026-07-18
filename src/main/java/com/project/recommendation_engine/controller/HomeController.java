@@ -2,14 +2,15 @@ package com.project.recommendation_engine.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.project.recommendation_engine.model.User;
+import com.project.recommendation_engine.repository.UserRepository;
 import com.project.recommendation_engine.service.RecommendationAgentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import com.project.recommendation_engine.model.TMDBResponse;
 import com.project.recommendation_engine.model.UserRecommendation;
@@ -17,83 +18,56 @@ import com.project.recommendation_engine.repository.RecommendationRepository;
 import com.project.recommendation_engine.service.TMDBService;
 import com.project.recommendation_engine.service.UserService;
 
-import jakarta.servlet.http.HttpSession;
 
+@Slf4j
 @Controller
 public class HomeController {
 
-    @Autowired
-    private TMDBService tmdbService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private RecommendationRepository recommendationRepository;
-    @Autowired
-    private RecommendationAgentService agentService;
+    private final TMDBService tmdbService;
+    private final UserService userService;
+    private final RecommendationRepository recommendationRepository;
+    private final UserRepository userRepository;
+    private final RecommendationAgentService agentService;
+
+    public HomeController(TMDBService tmdbService,
+                          UserService userService,
+                          RecommendationRepository recommendationRepository,
+                          UserRepository userRepository,
+                          RecommendationAgentService agentService){
+        this.tmdbService = tmdbService;
+        this.userService = userService;
+        this.recommendationRepository = recommendationRepository;
+        this.userRepository = userRepository;
+        this.agentService = agentService;
+    }
 
     @GetMapping("/home")
-    public String home(Model model, HttpSession session, @RequestParam(value = "refresh", required = false) String refresh){
-        // Get current authenticated user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        
-        // Check if this is a different user than cached data
-        String cachedUsername = (String) session.getAttribute("cachedUsername");
-        
-        // Check cache timestamp for automatic refresh (every 2 minutes)
-        Long lastCacheTime = (Long) session.getAttribute("lastCacheTime");
-        long currentTime = System.currentTimeMillis();
-        long cacheExpiryTime = 2 * 60 * 1000; // 2 minutes in milliseconds
-        
-        boolean cacheExpired = lastCacheTime == null || (currentTime - lastCacheTime) > cacheExpiryTime;
-        boolean manualRefresh = "true".equals(refresh);
-        
-        if (!currentUsername.equals(cachedUsername) || cacheExpired || manualRefresh) {
-            // Clear cache if different user OR cache expired (for fresh movies)
-            session.removeAttribute("trendingMovies");
-            // session.removeAttribute("userMovies");
-            // session.removeAttribute("sciFiMovies");
-            session.setAttribute("cachedUsername", currentUsername);
-            session.setAttribute("lastCacheTime", currentTime);
-            // String reason = manualRefresh ? "Manual refresh" : (cacheExpired ? "Cache expired" : "New user: " + currentUsername);
-        }
-        
-        // Check if movies are already cached in session
-        @SuppressWarnings("unchecked")
-        List<TMDBResponse> trendingMoviesList = (List<TMDBResponse>) session.getAttribute("trendingMovies");
-        if (trendingMoviesList == null) {
-            try {
-                trendingMoviesList = tmdbService.fetchTrendingMovies();
-                session.setAttribute("trendingMovies", trendingMoviesList);
-            } catch (Exception e) {
-                System.err.println("Error fetching trending movies: " + e.getMessage());
-                trendingMoviesList = new ArrayList<>();
-            }
-        }
+    public String home(Model model,
+                       Authentication authentication,
+                       @RequestParam(value = "refresh", required = false) String refresh){
 
+        String email = authentication.getName();
+        
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(()-> new RuntimeException("User not found."));
+        String userId = currentUser.getId();
+        
+        List<TMDBResponse> trendingMoviesList = tmdbService.fetchTrendingMovies();
         List<UserRecommendation.RecSection> recommendationSections = new ArrayList<>();
-        String userId = null;
 
         try {
-            // Get user's ID based on its username
-            userId = userService.getUserIdByUsername(currentUsername);
-
-            // Search most recent recommendation into 'recommended_cache' collection
             var recommendationOpt = recommendationRepository.findFirstByUserIdOrderByGeneratedAtDesc(userId);
 
             if (recommendationOpt.isPresent()) {
                 recommendationSections = recommendationOpt.get().getSections();
             } else {
-                System.out.println("DEBUG: No recommendations found for user ID: " + userId);
+                log.info("No recommendations found for user ID: " + userId);
             }
         } catch (Exception e) {
-            System.err.println("Error fetching recommendations from DB: " + e.getMessage());
+            log.error("Error fetching recommendations from DB: " + e.getMessage());
         }
 
-        // Send attributes to the view (home.html)
         model.addAttribute("trendingMoviesList", trendingMoviesList != null ? trendingMoviesList : new ArrayList<>());
-
-        // This variable "recommendationSections" is the one we will loop now in the HTML
         model.addAttribute("recommendationSections", recommendationSections);
         model.addAttribute("userId", userId);
 
@@ -101,57 +75,43 @@ public class HomeController {
     }
 
     @GetMapping("/movie/{title}")
-    public String movieView(@PathVariable String title, Model model, HttpSession session) {
-        // System.out.println("DEBUG: MovieView called with title: " + title);
-        
-        // Get the cached movies from session (check both new and old session keys for compatibility)
-        @SuppressWarnings("unchecked")
-        List<TMDBResponse> trendingList = (List<TMDBResponse>) session.getAttribute("trendingMovies");
-        TMDBResponse selectedMovie = null;
-
-        if (trendingList != null) {
-            selectedMovie = trendingList.stream()
-                    .filter(movie -> title.equals(movie.getTitle()))
-                    .findFirst()
-                    .orElse(null);
-        }
-
-        if (selectedMovie != null) {
-            model.addAttribute("movie", selectedMovie);
-            return "movieView";
-        }
-        
-        // If movie not found in session, try to fetch it directly from API
+    public String movieView(@PathVariable String title, Model model) {
         try {
-            TMDBResponse movie = (TMDBResponse) tmdbService.fetchRawMovieResponse(title);
-            if (movie != null && "True".equals(movie.getResponse())) {
+            TMDBResponse movie = tmdbService.fetchRawMovieResponse(title);
+            if (movie != null && "True".equalsIgnoreCase(movie.getResponse())) {
                 model.addAttribute("movie", movie);
                 return "movieView";
+            } else {
+                log.warn("Movie not found or invalid request for: {}", title);
             }
         } catch (Exception e) {
-            System.err.println("Error fetching movie with title: " + title + " - " + e.getMessage());
+            log.error("Error fetching movie with title: " + title + " - " + e.getMessage());
         }
         
-        // If all fails, redirect back to home
         return "redirect:/home";
     }
 
     @PostMapping("/rate-movie")
-    @org.springframework.web.bind.annotation.ResponseBody
-    public org.springframework.http.ResponseEntity<String> rateMovie(
+    public ResponseEntity<String> rateMovie(
             @RequestParam String movieId,
-            @RequestParam Double rating) {
-        
+            @RequestParam Double rating,
+            Authentication authentication){
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String currentUsername = authentication.getName();
+
+            if (rating < 0.0 || rating > 5.0) {
+                log.warn("Rating out of range: {} for movie {}", rating, movieId);
+                return ResponseEntity.badRequest().body("Invalid rating.");
+            }
+
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found."));
             
-            userService.addOrUpdateRating(currentUsername, movieId, rating);
-            
-            return org.springframework.http.ResponseEntity.ok("Rating saved successfully");
+            userService.addOrUpdateRating(user.getId(), movieId, rating);
+            return ResponseEntity.ok("Rating saved succesfully");
         } catch (Exception e) {
-            System.err.println("Error saving rating: " + e.getMessage());
-            return org.springframework.http.ResponseEntity.status(500).body("Error saving rating");
+            log.error("Error saving rating: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("ERROR trying to save new rating.");
         }
     }
 

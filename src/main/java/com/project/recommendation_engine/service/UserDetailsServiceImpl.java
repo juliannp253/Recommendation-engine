@@ -14,26 +14,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    // Injcts repository
     public UserDetailsServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        // Look for user in MongoDB by username or email
-        User user = userRepository.findByUsername(usernameOrEmail)
-                // If username does not exists, looks by email
-                .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
-                        // No email nor username, throw error
-                        .orElseThrow(() -> new UsernameNotFoundException(
-                                "User Not Found: " + usernameOrEmail)));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // Converts model user into UserDetails object
-       return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
                 user.getPassword(),
-                Collections.emptyList());
+                Collections.emptyList()
+        );
     }
 }

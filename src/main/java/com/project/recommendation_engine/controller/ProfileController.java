@@ -1,5 +1,6 @@
 package com.project.recommendation_engine.controller;
 
+import com.project.recommendation_engine.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -15,29 +16,21 @@ import com.project.recommendation_engine.service.UserService;
 public class ProfileController {
     
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    public ProfileController(UserService userService) {
+    public ProfileController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
-    public String showProfile(Model model) {
-        // Get current authenticated user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showProfile(Model model, Authentication authentication) {
         String currentUsername = authentication.getName();
-        
-        // Fetch user from database
-        User user = userService.findByUsername(currentUsername);
-        
-        if (user == null) {
-            return "redirect:/login";
-        }
-        
-        // Add user data to model
-        model.addAttribute("username", user.getUsername());
+        User user = userRepository.findByEmail(currentUsername).orElseThrow(() -> new RuntimeException("User Not Found"));
+
         model.addAttribute("email", user.getEmail());
         model.addAttribute("favoriteGenres", user.getFavoriteGenres());
-        
+
         return "profile";
     }
 }

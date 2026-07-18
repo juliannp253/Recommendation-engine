@@ -51,7 +51,7 @@
 
     <button class="nav-arrow prev-arrow" onclick="prevSlide()">&#10094;</button>
 
-    <img id="hero-poster" th:src="@{/images/placeholder.png}" alt="Featured Movie" class="hero-poster" style="transition: opacity 0.5s ease-in-out;" />
+    <img id="hero-poster" th:src="@{/images/placeholder.png}" alt="Featured Movie" class="hero-poster" style="transition: opacity 0.3s ease-in-out;" />
 
     <div class="hero-info">
         <h1 id="hero-title" class="movie-title">Generating Recommendations...</h1>
@@ -69,7 +69,6 @@
 <nav class="top-navbar">
     <ul>
         <li><a th:href="@{/home}">Home</a></li>
-        <li><a href="#">Filter</a></li>
         <li><a th:href="@{/search}">Search</a></li>
         <li><a th:href="@{/profile}">Profile</a></li>
         <li>
@@ -116,129 +115,13 @@
         <p style="color: white; text-align: center;">Generating your personalized recommendations...</p>
     </section>
 </main>
-
 <script th:inline="javascript">
-    /*<![CDATA[*/
 
-    var recommendationSections = /*[[${recommendationSections}]]*/ null;
-    var trendingMovies = /*[[${trendingMoviesList}]]*/ null;
-    var heroMovies = [];
+    window.serverRecommendationSections = /*[[${recommendationSections}]]*/ [];
+    window.serverTrendingMovies = /*[[${trendingMoviesList}]]*/ [];
 
-
-    if (recommendationSections && recommendationSections.length > 0) {
-        heroMovies = recommendationSections[0].movies;
-    }
-    else if (trendingMovies && trendingMovies.length > 0) {
-        heroMovies = trendingMovies.map(m => ({
-            id: m.ImdbID || m.id,
-            title: m.title,
-            posterPath: m.poster,
-            aiReason: m.plot || "Trending worldwide right now."
-        }));
-    }
-
-    let currentIndex = 0;
-    let autoSlideInterval;
-
-    const posterEl = document.getElementById('hero-poster');
-    const titleEl = document.getElementById('hero-title');
-    const descEl = document.getElementById('hero-desc');
-    const btnEl = document.getElementById('hero-btn');
-
-    function showHeroMovie(index) {
-        if (heroMovies.length === 0) return;
-
-        // LOOP
-        if (index >= heroMovies.length) currentIndex = 0;
-        else if (index < 0) currentIndex = heroMovies.length - 1;
-        else currentIndex = index;
-
-        const movie = heroMovies[currentIndex];
-
-        // Fade Out
-        posterEl.style.opacity = 0;
-
-        setTimeout(() => {
-            // Update Content
-            posterEl.src = movie.posterPath;
-            titleEl.textContent = movie.title;
-            descEl.textContent = movie.aiReason ? '"' + movie.aiReason + '"' : "Recommended for you.";
-
-            // Use ID for link
-            btnEl.href = '/movie/' + movie.id;
-
-            // Fade In
-            posterEl.style.opacity = 1;
-        }, 300);
-    }
-
-    function nextSlide() {
-        showHeroMovie(currentIndex + 1);
-        resetTimer(); // Restart counter
-    }
-
-    function prevSlide() {
-        showHeroMovie(currentIndex - 1);
-        resetTimer(); // Restart counter
-    }
-
-    function resetTimer() {
-        clearInterval(autoSlideInterval);
-        autoSlideInterval = setInterval(() => {
-            showHeroMovie(currentIndex + 1);
-        }, 7500); // 7.5 sec
-    }
-
-    // Initialize
-    if (heroMovies.length > 0) {
-        showHeroMovie(0); // Show first
-        resetTimer();     // Start timer
-    }
-    /*]]>*/
-
-    function runDemoAgent() {
-        // 1. Get User ID
-        /*<![CDATA[*/
-        const userId = /*[[${userId}]]*/ 'UserNotFound';
-        /*]]>*/
-
-        if (!userId) {
-            alert("Error: User ID not found in view.");
-            return;
-        }
-
-        // 2. Show load page
-        const overlay = document.getElementById('loadingOverlay');
-        overlay.style.display = 'flex';
-
-        // 3. Get CSRF token
-        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
-        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-
-        // 4. Call the backend
-        fetch('/api/trigger-demo-agent?userId=' + userId, {
-            method: 'POST',
-            headers: {
-                [csrfHeader]: csrfToken
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                // 5. Succesful: Reload page to see changes
-                console.log("Agent finished!");
-                window.location.reload();
-            } else {
-                alert("Error running agent.");
-                overlay.style.display = 'none';
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            alert("Network error.");
-            overlay.style.display = 'none';
-        });
-    }
 </script>
+<script th:src="@{/js/home.js}"></script>
 
 </body>
 </html>

@@ -18,13 +18,11 @@ public class RegisterController {
         this.userService = userService;
     }
 
-    // GET → Render view
     @GetMapping
     public String registerForm() {
         return "register";
     }
 
-    // POST → Process form
     @PostMapping
     public String registerUser(@ModelAttribute User user, Model model) {
         User savedUser;
@@ -33,11 +31,11 @@ public class RegisterController {
             savedUser = userService.registerUser(user);
         } catch (RuntimeException e) {
             model.addAttribute("registrationError", e.getMessage());
-            return "register"; // Show form again
+            return "register";
         }
         String userId = savedUser.getId();
 
-        return "redirect:/questionnaire?userId=" + userId; // Continue to Home Page
+        return "redirect:/questionnaire?userId=" + userId;
     }
 }
 

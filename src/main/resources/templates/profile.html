@@ -16,7 +16,6 @@
     <nav class="top-navbar">
         <ul>
             <li><a th:href="@{/home}">Home</a></li>
-            <li><a href="#">Filter</a></li>
             <li><a th:href="@{/search}">Search</a></li>
             <li>
                 <form th:action="@{/logout}" method="post" style="display: inline;">
@@ -34,10 +33,6 @@
         <section class="movie-category">
             <h2>Account Information</h2>
             <div style="background-color: #1c1c1c; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                <p style="margin-bottom: 0.8rem; font-size: 1.1rem;">
-                    <strong style="color: #e50914;">Username:</strong>
-                    <span th:text="${username}">User Name</span>
-                </p>
                 <p style="margin-bottom: 0; font-size: 1.1rem;">
                     <strong style="color: #e50914;">Email:</strong>
                     <span th:text="${email}">user@example.com</span>

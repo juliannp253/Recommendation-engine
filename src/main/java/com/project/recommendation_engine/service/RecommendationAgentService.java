@@ -16,15 +16,12 @@ public class RecommendationAgentService {
     @Value("${app.python.command:python3}")
     private String pythonCommand;
 
-    //private final String PYTHON_CMD = "python3";
-
-    @Async("taskExecutor") // Thread's pool defined on AsyncConfig
+    @Async("taskExecutor")
     public void triggerRecommendationForUser(String userId) {
         long startTime = System.currentTimeMillis();
         System.out.println("[Async] Running Python Agent for User: " + userId);
 
         try {
-            // Build command: python batch_processor.py --user_id XXXXX
             ProcessBuilder processBuilder = new ProcessBuilder(
                     pythonCommand,
                     SCRIPT_PATH,
@@ -35,18 +32,14 @@ public class RecommendationAgentService {
             // See messages on Java Console
             processBuilder.redirectErrorStream(true);
 
-            // Initiate process
             Process process = processBuilder.start();
 
-            // Read what Python prints for debugging from Java
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                // TITLE to distinguish from Spring messages logs
                 System.out.println("   [Python Agent]: " + line);
             }
 
-            // Wait till it finishes
             int exitCode = process.waitFor();
             long duration = System.currentTimeMillis() - startTime;
 
@@ -62,19 +55,15 @@ public class RecommendationAgentService {
         }
     }
 
-    // For all users every two weeks (Sundays at 1:00 AM)
     public void runFullBatchProcess() {
         long startTime = System.currentTimeMillis();
         System.out.println("[Scheduler] initializing Batch for All Users...");
 
         try {
-            // Build command without argument: --user_id
             ProcessBuilder processBuilder = new ProcessBuilder(
                     pythonCommand,
                     SCRIPT_PATH
             );
-
-            // processBuilder.directory(new java.io.File("D:\\OneDrive\\Escritorio\\UNIVERSITY\\FALL2025\\Senior Project\\movie-agent"));
 
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();

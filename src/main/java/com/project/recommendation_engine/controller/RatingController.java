@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RatingController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public RatingController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/api/rate")
-    public ResponseEntity<String> rateMovie(@RequestBody RatingRequest request) {
-        // Get current user from session
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
+    public ResponseEntity<String> rateMovie(@RequestBody RatingRequest request, Authentication authentication) {
+        String username = authentication.getName();
 
         if (username != null && request.getMovieId() != null) {
-            // Save rating
             userService.addOrUpdateRating(username, request.getMovieId(), request.getRating());
             return ResponseEntity.ok("Rating saved successfully");
         }
