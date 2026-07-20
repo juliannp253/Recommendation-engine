@@ -6,7 +6,7 @@ WORKDIR /app
 ENV MAVEN_OPTS="-Xmx512m"
 
 # Copiamos solo lo necesario para descargar dependencias (Cache Layer)
-COPY .mvn/ .mvn
+COPY .mvn .mvn
 COPY mvnw pom.xml ./
 RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline
