@@ -13,12 +13,10 @@ class UserTest {
         User user = new User();
 
         user.setId("1L");
-        user.setUsername("user1");
         user.setEmail("user1@example.com");
         user.setPassword("securePassword");
 
         assertEquals("1L", user.getId());
-        assertEquals("user1", user.getUsername());
         assertEquals("user1@example.com", user.getEmail());
         assertEquals("securePassword", user.getPassword());
     }

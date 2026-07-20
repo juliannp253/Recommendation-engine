@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(HomeController.class)
-@Import(SecurityConfig.class)          // Import SecurityConfig to access endpoint without authentication
+@Import(SecurityConfig.class)
 class HomeControllerTest {
 
     @Autowired
@@ -21,7 +21,7 @@ class HomeControllerTest {
     @Test
     void homePageShouldReturnView() throws Exception {
         mockMvc.perform(get("/home"))
-                .andExpect(status().isOk())       // Response HTTP 200
+                .andExpect(status().isOk())
                 .andExpect(view().name("home"));
 
     }

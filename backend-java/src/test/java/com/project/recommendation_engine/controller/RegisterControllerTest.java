@@ -57,7 +57,6 @@ class RegisterControllerTest {
         verify(userService).registerUser(userCaptor.capture());
 
         User captured = userCaptor.getValue();
-        assertThat(captured.getUsername()).isEqualTo("user");
         assertThat(captured.getEmail()).isEqualTo("user@example.com");
         assertThat(captured.getPassword()).isEqualTo("1234");
     }

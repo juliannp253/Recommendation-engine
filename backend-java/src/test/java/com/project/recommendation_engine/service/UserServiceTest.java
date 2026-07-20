@@ -28,12 +28,10 @@ class UserServiceTest {
     @Test
     void testRegisterUser_Success() {
         User user = new User();
-        user.setUsername("user");
         user.setEmail("user@example.com");
         user.setPassword("1234");
 
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
-        when(userRepository.existsByUsername("user")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User savedUser = userService.registerUser(user);
@@ -47,7 +45,6 @@ class UserServiceTest {
     @Test
     void testRegisterUser_EmailAlreadyExists() {
         User user = new User();
-        user.setUsername("user");
         user.setEmail("user@example.com");
         user.setPassword("1234");
 
@@ -62,12 +59,10 @@ class UserServiceTest {
     @Test
     void testRegisterUser_UsernameAlreadyExists() {
         User user = new User();
-        user.setUsername("user");
         user.setEmail("user@example.com");
         user.setPassword("1234");
 
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
-        when(userRepository.existsByUsername("user")).thenReturn(true);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.registerUser(user));
         assertEquals("This username already exists.", exception.getMessage());
