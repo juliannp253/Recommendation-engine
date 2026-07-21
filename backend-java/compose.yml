@@ -1,0 +1,27 @@
+services:
+  floci:
+    image: floci-io/floci:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - FLOCI_PERSISTENCE=1
+    volumes:
+      - floci-data:/data
+
+  app-cine:
+    build:
+      context: .
+      dockerfile: Dockerfile.aws
+    ports:
+      - "8080:8080"
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://floci:4566
+      - TMDB_API_KEY=tu_api_key_aqui
+    depends_on:
+      - floci
+
+volumes:
+  floci-data:
