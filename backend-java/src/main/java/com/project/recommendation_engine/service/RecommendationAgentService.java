@@ -1,6 +1,7 @@
 package com.project.recommendation_engine.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,11 @@ import java.io.InputStreamReader;
 
 @Service
 public class RecommendationAgentService {
+    private final CacheManager cacheManager;
+
+    public RecommendationAgentService(CacheManager cacheManager){
+        this.cacheManager = cacheManager;
+    }
 
     @Value("${app.python.script-path:./python_agent/batch_processor.py}")
     private String SCRIPT_PATH;
@@ -45,6 +51,12 @@ public class RecommendationAgentService {
 
             if (exitCode == 0) {
                 System.out.println("[Async] Agent ended successfully in " + duration + "ms");
+
+                var cache = cacheManager.getCache("userRecommendations");
+                if (cache != null) {
+                    cache.evict(userId);
+                    System.out.println("[Cache] Recommendations deleted on Redis for user: " + userId);
+                }
             } else {
                 System.err.println("[Async] Agent fail with end code: " + exitCode);
             }
@@ -79,6 +91,12 @@ public class RecommendationAgentService {
 
             if (exitCode == 0) {
                 System.out.println("[Scheduler] Batch ended in " + duration + "ms");
+
+                var cache = cacheManager.getCache("userRecommendations");
+                if (cache != null) {
+                    cache.clear();
+                    System.out.println("[Cache] All cache from recommendations on Redis cleaned (Batch).");
+                }
             } else {
                 System.err.println("[Scheduler] Batch failed with code: " + exitCode);
             }

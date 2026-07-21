@@ -3,10 +3,12 @@ package com.project.recommendation_engine.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.io.Serializable;
 import java.util.List;
 
 @Document(collection = "recommended_cache")
-public class UserRecommendation {
+public class UserRecommendation implements Serializable {
 
     @Id
     private String id;
@@ -34,7 +36,7 @@ public class UserRecommendation {
     public void setSections(List<RecSection> sections) { this.sections = sections; }
 
     // --- Inner Class: Section ---
-    public static class RecSection {
+    public static class RecSection implements Serializable {
         private String title;
         private String type;
         private List<RecMovie> movies;
@@ -49,7 +51,7 @@ public class UserRecommendation {
     }
 
     // --- Inner Class: Movie ---
-    public static class RecMovie {
+    public static class RecMovie implements Serializable {
         @Field("id")
         private Integer tmdbId;
 
