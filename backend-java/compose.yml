@@ -1,0 +1,31 @@
+services:
+  floci:
+    image: floci/floci:latest
+    container_name: floci_aws_emulator
+    ports:
+      - "4566:8080"
+
+  redis:
+    image: redis:7-alpine
+    container_name: app_cine_redis
+    ports:
+      - "6379:6379"
+
+  app-cine:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: app_cine_local
+    ports:
+      - "8080:8080"
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://floci:8080
+      - TMDB_API_KEY=1b184da9ac25353e5631393f23525b1e
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+    depends_on:
+      - floci
+      - redis

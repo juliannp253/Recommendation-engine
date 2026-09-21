@@ -1,0 +1,25 @@
+# ==========================================
+# Entorno de Ejecución Local (Runtime)
+# ==========================================
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+
+# Instalar Python y pip para el agente de IA
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir --upgrade pip
+
+# Asumimos que compilarás el JAR localmente antes de levantar Docker (mvn clean package)
+COPY target/*.jar app.jar
+
+# Copiar el agente de Python e instalar sus dependencias
+COPY python_agent /app/python_agent
+RUN pip3 install --no-cache-dir -r /app/python_agent/requirements.txt
+
+EXPOSE 8080
+
+# Ejecución normal de Java compartiendo recursos locales de forma holgada
+ENTRYPOINT ["java", "-jar", "app.jar"]
