@@ -1,0 +1,28 @@
+name: Deploy Movies AI to AWS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/Recommendation-engine/backend-java
+            git pull origin main
+            docker build --no-cache -t movies-ai-app .
+            docker stop movies-container || true
+            docker rm movies-container || true
+            docker run -d \
+              -p 8080:8080 \
+              --env-file .env \
+              --name movies-container \
+              --restart always \
+              movies-ai-app
