@@ -12,11 +12,19 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-        return (builder) -> builder
-                .withCacheConfiguration("trendingMovies",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(12)))
+        return (builder) -> {
+            RedisCacheConfiguration baseConfig = RedisCacheConfiguration.defaultCacheConfig()
+                    .disableCachingNullValues();
 
-                .withCacheConfiguration("movieDetails",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(7)));
+            builder
+                    .withCacheConfiguration("trendingMovies",
+                            baseConfig.entryTtl(Duration.ofHours(12)))
+
+                    .withCacheConfiguration("movieDetails",
+                            baseConfig.entryTtl(Duration.ofDays(7)))
+
+                    .withCacheConfiguration("userRecommendations",
+                            baseConfig.entryTtl(Duration.ofHours(24)));
+        };
     }
 }
