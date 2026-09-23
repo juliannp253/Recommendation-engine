@@ -64,8 +64,10 @@ public class TMDBResponse implements Serializable {
     public void setWatchLink(String watchLink) { this.watchLink = watchLink; }
 
     public static class Provider implements Serializable {
-        private final String name;
-        private final String logoUrl;
+        private String name;
+        private String logoUrl;
+
+        public Provider() {}
 
         public Provider(String name, String logoUrl) {
             this.name = name;

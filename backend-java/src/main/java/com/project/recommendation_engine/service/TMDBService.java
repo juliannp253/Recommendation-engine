@@ -47,7 +47,7 @@ public class TMDBService {
         this.taskExecutor = taskExecutor;
     }
 
-    @Cacheable(value = "movieDetails", key = "#titleOrId")
+    @Cacheable(value = "movieDetails", key = "#titleOrId", unless = "#result == null")
     public TMDBResponse fetchRawMovieResponse(String titleOrId) {
         Long tmdbId = resolveTmdbId(titleOrId);
         if (tmdbId == null) {
@@ -76,7 +76,7 @@ public class TMDBService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "trendingMovies", key = "'daily_trending'")
+    @Cacheable(value = "trendingMovies", key = "'daily_trending'", unless = "#result == null || #result.isEmpty()")
     public List<TMDBResponse> fetchTrendingMovies() {
         return apiClient.getPopularMovies(1).stream()
                 .limit(TRENDING_MOVIES_LIMIT)

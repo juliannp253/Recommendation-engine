@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface RecommendationRepository extends MongoRepository<UserRecommendation, String> {
 
-    @Cacheable(value = "userRecommendations", key = "#userId")
+    @Cacheable(value = "userRecommendations", key = "#userId", unless = "#result == null")
     Optional<UserRecommendation> findFirstByUserIdOrderByGeneratedAtDesc(String userId);
 }
