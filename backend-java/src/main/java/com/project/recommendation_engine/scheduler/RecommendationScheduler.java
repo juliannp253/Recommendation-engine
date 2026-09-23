@@ -11,8 +11,11 @@ import java.time.LocalDate;
 @Component
 public class RecommendationScheduler {
 
-    @Autowired
-    private RecommendationAgentService agentService;
+    private final RecommendationAgentService agentService;
+
+    public RecommendationScheduler(RecommendationAgentService agentService) {
+        this.agentService = agentService;
+    }
 
     // CRON: Second Minutes Hours DayMonth Month WeekDay
     // "0 0 1 * * SUN" = ALL Sundays at 1:00 AM
