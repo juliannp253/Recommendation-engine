@@ -15,6 +15,11 @@
 *.swp
 *.swo
 
+### Python Agent ###
+python_agent/venv/
+python_agent/__pycache__/
+python_agent/.env
+
 # ==== OS ====
 .DS_Store       # macOS
 Thumbs.db       # Windows
@@ -23,3 +28,9 @@ Desktop.ini
 
 # ==== Other ====
 *.log
+
+# ==== Python ====
+__pycache__/
+*.pyc
+venv/
+.venv/
