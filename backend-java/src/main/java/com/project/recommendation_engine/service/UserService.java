@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.project.recommendation_engine.model.Rating;
 import com.project.recommendation_engine.model.User;
@@ -55,27 +54,6 @@ public class UserService {
         return genres != null ? genres : Collections.emptyList();
     }
 
-    /*public String getUserIdByUsername(String username) {
-
-        return userRepository.findByUsername(username)
-                .map(User::getId)
-                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found."));
-    }*/
-
-    /*public List<String> getFavoriteGenresByUsername(String username) {
-        // Find user by username and get their favorite genres
-        return userRepository.findByUsername(username)
-                .map(User::getFavoriteGenres)
-                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found or genres not set."));
-    }*/
-
-    /*public User findByUsername(String username) {
-        // Find user by username and return the User object
-        return userRepository.findByUsername(username)
-                .orElse(null);
-    }*/
-
-    @Transactional
     public void addMovieRatings(String userId, List<Rating> newRatings) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User " + userId + " not found."));
@@ -84,7 +62,6 @@ public class UserService {
         recommendationAgentService.triggerRecommendationForUser(userId); // Implementar RabbitMQ
     }
 
-    @Transactional
     public void addOrUpdateRating(String userId, String movieId, Double ratingValue) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User " + userId + " not found."));
