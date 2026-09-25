@@ -1,31 +1,47 @@
 services:
-  floci:
-    image: floci/floci:latest
-    container_name: floci_aws_emulator
-    ports:
-      - "4566:8080"
+  mongodb:
+    image: mongo:7.0
+    container_name: app_cine_mongo
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     container_name: app_cine_redis
-    ports:
-      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
 
   app-cine:
     build:
       context: .
-      dockerfile: Dockerfile.local
-    container_name: app_cine_local
+      dockerfile: Dockerfile
+    container_name: app_cine
     ports:
       - "8080:8080"
+    env_file:
+      - ../.env
     environment:
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-1
-      - AWS_ENDPOINT_URL=http://floci:8080
-      - TMDB_API_KEY=1b184da9ac25353e5631393f23525b1e
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
+      SPRING_MONGO_URI: mongodb://mongodb:27017/recsysdb
+      MONGO_URI: mongodb://mongodb:27017/recsysdb
+      DB_NAME: recsysdb
+      RECOMMENDATION_COLLECTION: recommended_cache
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
     depends_on:
-      - floci
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  mongo_data:
