@@ -42,15 +42,19 @@ Copy `.env.example` to `.env` and set values:
 
 ```env
 SPRING_APPLICATION_NAME=recommendatio-engine
-MONGODB_URI=mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority
+SPRING_MONGO_URI=mongodb://localhost:27017/recsysdb
 TMDB_API_KEY=<tmdb_api_key>
 TMDB_API_BASEURL=https://api.themoviedb.org/3
 APP_PYTHON_COMMAND=python3    # or python on Windows
-APP_PYTHON_SCRIPTHPATH=./python_agent/batch_processor.py
+APP_PYTHON_SCRIPT_PATH=./python_agent/batch_processor.py
+AZURE_OPENAI_API_KEY=<azure_api_key>
+AZURE_OPENAI_API_VERSION=2025-01-01-preview
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com
 ```
 
 Notes:
-- `APP_PYTHON_SCRIPTHPATH` is relative to the Java process working directory.
+- `APP_PYTHON_SCRIPT_PATH` is relative to the Java process working directory.
+- Docker Compose loads this file from the repository root. It connects Java and Python to the MongoDB service automatically.
 - Ensure the MongoDB recommendation collection name matches Java: set Python `RECOMMENDATION_COLLECTION` to `recommended_cache`.
 
 ### Python agent env (`backend-java/python_agent/.env`)
@@ -92,11 +96,14 @@ docker run --rm -p 8080:8080 \
   -e AZURE_OPENAI_API_VERSION=2025-01-01-preview \
   -e AZURE_OPENAI_ENDPOINT=https://<resource>.openai.azure.com \
   -e TMDB_API_KEY=<tmdb_key> \
+  -e SPRING_MONGO_URI=<mongo_uri> \
   -e MONGO_URI=<mongo_uri> \
   -e DB_NAME=<db_name> \
   -e RECOMMENDATION_COLLECTION=recommended_cache \
   recommendation-engine
 ```
+
+For the full stack, place `.env` at the repository root and run `docker compose up -d --build` from `backend-java`. The application listens on port 8080; MongoDB and Redis are available only to the containers. Check `http://localhost:8080/login` after startup.
 
 ## Key Endpoints
 - Pages: `GET /login`, `GET/POST /register`, `GET /home`, `GET /profile`, `GET/POST /search`, `GET /movie/{title}`
@@ -134,9 +141,16 @@ recommendatio engine/
 - Tests: `cd backend-java && ./mvnw test`
 - Sensitive config is excluded by `.gitignore` (`.env` files). Do not commit secrets.
 
+## CI and EC2 deployment
+- CI runs on pushes to `main`, `feature/**`, and `refactor/**`, and on pull requests targeting `main`.
+- Protect `main` in GitHub and require the `build-and-test` status check before merging. This setting lives in the repository's branch rules, outside the workflow files.
+- Configure repository secrets `EC2_HOST`, `EC2_USER`, and `EC2_SSH_KEY`.
+- On EC2, clone the repository at `~/Recommendation-engine`, install Docker with Compose, allow the SSH user to run Docker, and place a populated `.env` at the repository root. Keep this file out of Git.
+- Allow inbound TCP port 8080 on the EC2 security group if the login page must be reachable publicly. The deployment checks `http://<EC2_HOST>:8080/login` after the containers start.
+
 ## Troubleshooting
 - Python not found: set `APP_PYTHON_COMMAND` to `python` on Windows or `python3` on macOS/Linux.
-- Script path issues: verify `APP_PYTHON_SCRIPTHPATH=./python_agent/batch_processor.py` from the Java working dir.
+- Script path issues: verify `APP_PYTHON_SCRIPT_PATH=./python_agent/batch_processor.py` from the Java working dir.
 - No recommendations: ensure `RECOMMENDATION_COLLECTION` is `recommended_cache`, Mongo credentials are valid, and Azure OpenAI envs are set.
 
 ## License

@@ -1,5 +1,7 @@
 package com.project.recommendation_engine.controller;
 
+import com.project.recommendation_engine.model.User;
+import com.project.recommendation_engine.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,11 +19,17 @@ import com.project.recommendation_engine.service.UserService;
 
 @Controller
 public class SearchController {
-    @Autowired
-    private TMDBService tmdbService;
-    
-    @Autowired
-    private UserService userService;
+
+    private final TMDBService tmdbService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+
+    public SearchController(TMDBService tmdbService, UserService userService, UserRepository userRepository){
+        this.tmdbService = tmdbService;
+        this.userService = userService;
+        this.userRepository = userRepository;
+    }
+
     
     @GetMapping("/search")
     public String search() {
@@ -46,13 +54,14 @@ public class SearchController {
     @ResponseBody
     public ResponseEntity<String> rateMovie(
             @RequestParam String movieId,
-            @RequestParam Double rating) {
+            @RequestParam Double rating,
+            Authentication authentication) {
         
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String currentUsername = authentication.getName();
-            
-            userService.addOrUpdateRating(currentUsername, movieId, rating);
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                            .orElseThrow(() -> new RuntimeException("User not found."));
+            userService.addOrUpdateRating(user.getId(), movieId, rating);
             
             return ResponseEntity.ok("Rating saved successfully");
         } catch (Exception e) {

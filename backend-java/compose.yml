@@ -1,0 +1,47 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: app_cine_mongo
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: app_cine_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  app-cine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_cine
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../.env
+    environment:
+      SPRING_MONGO_URI: mongodb://mongodb:27017/recsysdb
+      MONGO_URI: mongodb://mongodb:27017/recsysdb
+      DB_NAME: recsysdb
+      RECOMMENDATION_COLLECTION: recommended_cache
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  mongo_data:

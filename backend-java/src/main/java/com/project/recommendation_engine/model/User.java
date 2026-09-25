@@ -1,5 +1,6 @@
 package com.project.recommendation_engine.model;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -16,6 +17,7 @@ public class User {
     @Field("password")
     private String password;
     private List<String> favoriteGenres = new ArrayList<>();
+    @CreatedDate
     private LocalDateTime createdAt;
     private List<Rating> movieRatings = new ArrayList<>();
 
@@ -70,9 +72,4 @@ public class User {
         this.favoriteGenres = favoriteGenres;
     }
 
-    protected void onCreate(){
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-    }
 }

@@ -1,11 +1,12 @@
 package com.project.recommendation_engine.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TMDBResponse {
+public class TMDBResponse implements Serializable {
     @JsonProperty("Title")
     private String title;
     @JsonProperty("Year")
@@ -62,9 +63,11 @@ public class TMDBResponse {
     public String getWatchLink() { return watchLink; }
     public void setWatchLink(String watchLink) { this.watchLink = watchLink; }
 
-    public static class Provider {
-        private final String name;
-        private final String logoUrl;
+    public static class Provider implements Serializable {
+        private String name;
+        private String logoUrl;
+
+        public Provider() {}
 
         public Provider(String name, String logoUrl) {
             this.name = name;

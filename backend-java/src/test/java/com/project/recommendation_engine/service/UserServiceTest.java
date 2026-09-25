@@ -4,26 +4,28 @@ import com.project.recommendation_engine.model.User;
 import com.project.recommendation_engine.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private BCryptPasswordEncoder passwordEncoder;
+    @Mock
+    private RecommendationAgentService recommendationAgentService;
 
     @InjectMocks
     private UserService userService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void testRegisterUser_Success() {
@@ -32,13 +34,13 @@ class UserServiceTest {
         user.setPassword("1234");
 
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("1234")).thenReturn("$2a$10$hashedvalue");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User savedUser = userService.registerUser(user);
 
-        assertNotNull(savedUser.getCreatedAt());
-        assertNotEquals("1234", savedUser.getPassword()); // Password now it's encrypted
-        assertTrue(new BCryptPasswordEncoder().matches("1234", savedUser.getPassword()));
+        assertNotEquals("1234", savedUser.getPassword());
+        assertEquals("$2a$10$hashedvalue", savedUser.getPassword());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -56,17 +58,4 @@ class UserServiceTest {
         verify(userRepository, never()).save(any(User.class));
     }
 
-    @Test
-    void testRegisterUser_UsernameAlreadyExists() {
-        User user = new User();
-        user.setEmail("user@example.com");
-        user.setPassword("1234");
-
-        when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.registerUser(user));
-        assertEquals("This username already exists.", exception.getMessage());
-
-        verify(userRepository, never()).save(any(User.class));
-    }
 }

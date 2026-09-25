@@ -20,13 +20,4 @@ class UserTest {
         assertEquals("user1@example.com", user.getEmail());
         assertEquals("securePassword", user.getPassword());
     }
-
-    @Test
-    void testOnCreateSetsCreatedAt() {
-        User user = new User();
-        user.onCreate();
-
-        assertNotNull(user.getCreatedAt());
-        assertTrue(user.getCreatedAt().isBefore(LocalDateTime.now().plusSeconds(1)));
-    }
 }

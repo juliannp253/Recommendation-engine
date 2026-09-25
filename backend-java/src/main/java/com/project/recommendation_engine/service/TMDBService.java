@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
 
 import com.project.recommendation_engine.model.GenreMovies;
 import com.project.recommendation_engine.model.Movie;
@@ -45,6 +46,7 @@ public class TMDBService {
         this.taskExecutor = taskExecutor;
     }
 
+    @Cacheable(value = "movieDetails", key = "#titleOrId", unless = "#result == null")
     public TMDBResponse fetchRawMovieResponse(String titleOrId) {
         Long tmdbId = resolveTmdbId(titleOrId);
         if (tmdbId == null) {
@@ -73,6 +75,7 @@ public class TMDBService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "trendingMovies", key = "'daily_trending'", unless = "#result == null || #result.isEmpty()")
     public List<TMDBResponse> fetchTrendingMovies() {
         return apiClient.getPopularMovies(1).stream()
                 .limit(TRENDING_MOVIES_LIMIT)
